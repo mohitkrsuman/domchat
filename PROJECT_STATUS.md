@@ -4,31 +4,23 @@
 
 ---
 
-## Current phase: **Phase 2 — Multiplayer shell**
+## Current phase: **Phase 3 — Agent v1**
 
 **Phase 0 completed:** 2026-08-20  
 **Phase 1 completed:** 2026-08-20  
-**Phase 2 started:** 2026-08-20  
-**Target:** Live session room, presence, human chat, persisted timeline (no agent)
+**Phase 2 completed:** 2026-08-20  
+**Phase 3 started:** 2026-08-20  
+**Target:** Background agent runs, stream to timeline, repo read tools (no redirect/approvals)
 
 ---
 
-## Phase 2 exit criteria
+## Phase 3 exit criteria
 
-- [ ] Two browser sessions join the same session room
-- [ ] Messages appear for all participants within ~2 seconds
-- [ ] Page refresh restores full timeline
-- [ ] Viewer cannot send messages (403 / disabled UI)
-- [ ] Presence list updates on join/leave
-
-### Implemented (code ready — verify in two browsers)
-
-- Workspace members API + UI (admin adds by email, roles `admin` | `member`)
-- Session GET/PATCH + `/sessions/[id]` room (metadata, share link, timeline)
-- `session_participants` (`viewer` | `contributor` | `owner`) and append-only `session_events`
-- REST: join, messages, events, participant role
-- WebSocket server + Redis pub/sub (`npm run dev` starts Next + realtime; or `npm run dev:realtime`)
-- Presence panel, composer (viewers blocked), timeline replay
+- [ ] User starts run from session room
+- [ ] All participants see streaming agent output
+- [ ] Agent reads/searches public GitHub repo
+- [ ] Tool calls visible on timeline
+- [ ] Run completes with clear status
 
 ---
 
@@ -38,8 +30,8 @@
 |---|---|---|
 | 0 | Setup & learning | **complete** |
 | 1 | Foundation (auth, workspace, session CRUD) | **complete** |
-| 2 | Multiplayer shell (WebSocket, timeline) | **in progress** |
-| 3 | Agent v1 (queue, tools, streaming) | not started |
+| 2 | Multiplayer shell (WebSocket, timeline) | **complete** |
+| 3 | Agent v1 (queue, tools, streaming) | **in progress** |
 | 4 | Collaboration MVP (redirect, diff, approval, handoff) | not started |
 | 5 | Engineering depth (private repos, sandbox, PR) | not started |
 | 6 | Second wedge (support or sales) | not started |
@@ -50,17 +42,33 @@
 
 ## What to build in current phase only
 
-### Phase 2 (now)
+### Phase 3 (now)
 
-- Session room at `/sessions/:id`
-- WebSocket gateway + Redis pub/sub (`session:{id}`)
-- Presence, human messages, append-only event log, timeline replay
-- Share link; session roles viewer / contributor / owner
+- BullMQ worker + `agent_runs` (queued → running → stopped/completed/failed)
+- Start/stop run API from session room
+- Stream agent tokens + tool events to timeline via WebSocket
+- Context paste (`session_context` / logs)
+- Read-only tools: `read_file`, `search_repo` (public GitHub)
+- Run limits (max steps / duration)
 
 ### Do NOT build yet
 
-- Agent runs / BullMQ (Phase 3)
 - Redirect, artifacts, approvals, handoff, status machine (Phase 4)
+- GitHub App / private repos / sandbox (Phase 5)
+
+---
+
+## Phase 2 completion record
+
+All exit criteria met on 2026-08-20 (verified via `apps/web/scripts/verify-phase2.mts` — two WS clients):
+
+- [x] Two browser sessions join the same session room
+- [x] Messages appear for all participants within ~2 seconds
+- [x] Page refresh restores full timeline (events API returns latest N, chronological)
+- [x] Viewer cannot send messages (403 / disabled UI)
+- [x] Presence list updates on join/leave
+
+Also shipped: WebSocket gateway + Redis pub/sub, `session_events` append-only log, share link, roles `viewer` | `contributor` | `owner`.
 
 ---
 

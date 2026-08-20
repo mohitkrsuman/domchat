@@ -74,6 +74,16 @@ async function broadcastPresence(sessionId: string) {
 }
 
 async function authenticate(token: string) {
+  // Local Phase 2 verification only — never enable in production.
+  if (
+    process.env.ALLOW_VERIFY_WS_TOKENS === "1" &&
+    process.env.NODE_ENV !== "production" &&
+    token.startsWith("verify:")
+  ) {
+    const userId = token.slice("verify:".length);
+    return prisma.user.findUnique({ where: { id: userId } });
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??

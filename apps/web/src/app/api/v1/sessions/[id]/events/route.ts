@@ -21,12 +21,14 @@ export async function GET(req: Request, { params }: Params) {
     const limitRaw = Number(url.searchParams.get("limit") ?? "200");
     const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 500) : 200;
 
-    const events = await prisma.sessionEvent.findMany({
+    // Latest N events, returned oldest→newest for timeline replay.
+    const newestFirst = await prisma.sessionEvent.findMany({
       where: { sessionId: id },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       take: limit,
       include: { actor: { select: { id: true, email: true, name: true } } },
     });
+    const events = newestFirst.reverse();
 
     return NextResponse.json({ events: events.map(asTimelineEvent) });
   } catch (e) {
