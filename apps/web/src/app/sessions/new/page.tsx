@@ -5,15 +5,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { AppChrome } from "@/components/app-chrome";
 import { useToast } from "@/components/toast";
+import { SESSION_TYPE_LABELS, SESSION_TYPES } from "@/lib/session-fields";
 import { ButtonLoader } from "@/components/ui";
-
-const SESSION_TYPES = [
-  { value: "on_call", label: "On-call" },
-  { value: "feature", label: "Feature" },
-  { value: "bug", label: "Bug" },
-  { value: "testing", label: "Testing" },
-  { value: "other", label: "Other" },
-] as const;
 
 export default function NewSessionPage() {
   const router = useRouter();
@@ -55,7 +48,7 @@ export default function NewSessionPage() {
       }
 
       toast("Session created");
-      router.push("/sessions");
+      router.push(`/sessions/${data.session.id}`);
       router.refresh();
     } catch {
       const msg = "Failed to create session";
@@ -103,8 +96,8 @@ export default function NewSessionPage() {
             className="input"
           >
             {SESSION_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+              <option key={t} value={t}>
+                {SESSION_TYPE_LABELS[t]}
               </option>
             ))}
           </select>

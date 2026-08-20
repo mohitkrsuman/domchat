@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 import { SessionSeverity, SessionType } from "@prisma/client";
-import { getPrimaryWorkspace, requireUser } from "@/lib/auth";
+import { jsonError, requireUser, requireWorkspace } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-const TYPES = new Set(["on_call", "feature", "bug", "testing", "other"]);
-const SEVERITIES = new Set(["sev1", "sev2", "sev3"]);
+import { SESSION_EVENT_TYPES } from "@/lib/realtime-protocol";
+import { sessionDetailInclude } from "@/lib/session-access";
+import { appendSessionEvent } from "@/lib/session-events";
+import { isSessionSeverity, isSessionType } from "@/lib/session-fields";
 
 export async function GET() {
   try {
     const user = await requireUser();
-    const membership = await getPrimaryWorkspace(user.id);
-
-    if (!membership) {
-      return NextResponse.json({ error: "Create a workspace first" }, { status: 400 });
-    }
+    const membership = await requireWorkspace(user.id);
 
     const sessions = await prisma.session.findMany({
       where: { workspaceId: membership.workspaceId },
@@ -26,21 +23,15 @@ export async function GET() {
 
     return NextResponse.json({ sessions });
   } catch (e) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.json({ error: "Failed to list sessions" }, { status: 500 });
+    const { body, status } = jsonError(e, "Failed to list sessions");
+    return NextResponse.json(body, { status });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const user = await requireUser();
-    const membership = await getPrimaryWorkspace(user.id);
-
-    if (!membership) {
-      return NextResponse.json({ error: "Create a workspace first" }, { status: 400 });
-    }
+    const membership = await requireWorkspace(user.id);
 
     const body = await req.json();
     const title = typeof body.title === "string" ? body.title.trim() : "";
@@ -55,10 +46,10 @@ export async function POST(req: Request) {
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
-    if (!TYPES.has(typeRaw)) {
+    if (!isSessionType(typeRaw)) {
       return NextResponse.json({ error: "Invalid session type" }, { status: 400 });
     }
-    if (severityRaw && !SEVERITIES.has(severityRaw)) {
+    if (severityRaw && !isSessionSeverity(severityRaw)) {
       return NextResponse.json({ error: "Invalid severity" }, { status: 400 });
     }
 
@@ -72,17 +63,26 @@ export async function POST(req: Request) {
         workspaceId: membership.workspaceId,
         ownerId: user.id,
         createdById: user.id,
+        participants: {
+          create: {
+            userId: user.id,
+            role: "owner",
+          },
+        },
       },
-      include: {
-        owner: { select: { id: true, email: true, name: true } },
-      },
+      include: sessionDetailInclude,
+    });
+
+    await appendSessionEvent({
+      sessionId: session.id,
+      type: SESSION_EVENT_TYPES.sessionCreated,
+      actorId: user.id,
+      payload: { title, type: typeRaw, repoUrl },
     });
 
     return NextResponse.json({ session }, { status: 201 });
   } catch (e) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    const { body, status } = jsonError(e, "Failed to create session");
+    return NextResponse.json(body, { status });
   }
 }

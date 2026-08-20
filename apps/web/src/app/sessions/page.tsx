@@ -7,15 +7,8 @@ import { AppChrome } from "@/components/app-chrome";
 import { PageHeaderSkeleton, SessionsListSkeleton } from "@/components/skeletons";
 import { useToast } from "@/components/toast";
 import { Spinner } from "@/components/ui";
+import { SESSION_TYPE_LABELS } from "@/lib/session-fields";
 import { createClient } from "@/lib/supabase/client";
-
-const TYPE_LABELS: Record<string, string> = {
-  on_call: "On-call",
-  feature: "Feature",
-  bug: "Bug",
-  testing: "Testing",
-  other: "Other",
-};
 
 type Session = {
   id: string;
@@ -95,6 +88,9 @@ export default function SessionsPage() {
   return (
     <main className="page max-w-4xl">
       <AppChrome>
+        <Link href="/workspace" className="btn-secondary">
+          Workspace
+        </Link>
         <Link href="/sessions/new" className="btn-primary">
           New session
         </Link>
@@ -138,22 +134,25 @@ export default function SessionsPage() {
         {!loading && sessions.length > 0 && (
           <ul className="list">
             {sessions.map((session) => (
-              <li
-                key={session.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-4 py-4"
-              >
-                <div>
-                  <p className="font-medium">{session.title}</p>
-                  <p className="mt-1 text-xs muted">
-                    {TYPE_LABELS[session.type] ?? session.type}
-                    {session.severity ? ` · ${session.severity}` : ""}
-                    {` · ${session.status}`}
-                    {session.repoUrl ? ` · ${session.repoUrl}` : ""}
+              <li key={session.id}>
+                <Link
+                  href={`/sessions/${session.id}`}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 hover:bg-[color-mix(in_srgb,var(--fg)_4%,transparent)]"
+                >
+                  <div>
+                    <p className="font-medium">{session.title}</p>
+                    <p className="mt-1 text-xs muted">
+                      {SESSION_TYPE_LABELS[session.type as keyof typeof SESSION_TYPE_LABELS] ??
+                        session.type}
+                      {session.severity ? ` · ${session.severity}` : ""}
+                      {` · ${session.status}`}
+                      {session.repoUrl ? ` · ${session.repoUrl}` : ""}
+                    </p>
+                  </div>
+                  <p className="text-xs muted">
+                    {new Date(session.updatedAt).toLocaleString()}
                   </p>
-                </div>
-                <p className="text-xs muted">
-                  {new Date(session.updatedAt).toLocaleString()}
-                </p>
+                </Link>
               </li>
             ))}
           </ul>

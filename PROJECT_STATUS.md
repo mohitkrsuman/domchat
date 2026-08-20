@@ -4,30 +4,31 @@
 
 ---
 
-## Current phase: **Phase 1 — Foundation**
+## Current phase: **Phase 2 — Multiplayer shell**
 
 **Phase 0 completed:** 2026-08-20  
-**Phase 1 started:** 2026-08-20  
-**Target:** Auth, workspace, incident CRUD (no agent, no realtime)
+**Phase 1 completed:** 2026-08-20  
+**Phase 2 started:** 2026-08-20  
+**Target:** Live session room, presence, human chat, persisted timeline (no agent)
 
 ---
 
-## Phase 1 exit criteria
+## Phase 2 exit criteria
 
-- [ ] User can sign in and create a workspace
-- [ ] User can create and list sessions
-- [ ] Session data persists across refresh
-- [ ] Basic role on workspace: admin | member
+- [ ] Two browser sessions join the same session room
+- [ ] Messages appear for all participants within ~2 seconds
+- [ ] Page refresh restores full timeline
+- [ ] Viewer cannot send messages (403 / disabled UI)
+- [ ] Presence list updates on join/leave
 
-### Implemented (code ready — verify in browser)
+### Implemented (code ready — verify in two browsers)
 
-- Prisma schema + migration applied (`Session` model; types: on_call, feature, bug, testing, other)
-- Supabase Auth: `/login`, `/signup`, sign out
-- Local `User` upsert from Supabase session
-- Workspace create API + `/workspace` page (creator = `admin`)
-- Session list/create UI + `/api/v1/sessions`
-- Branding: DOOMCHAT; light/dark theme with icon toggle
-- Toast + button loaders + skeletons
+- Workspace members API + UI (admin adds by email, roles `admin` | `member`)
+- Session GET/PATCH + `/sessions/[id]` room (metadata, share link, timeline)
+- `session_participants` (`viewer` | `contributor` | `owner`) and append-only `session_events`
+- REST: join, messages, events, participant role
+- WebSocket server + Redis pub/sub (`npm run dev:all` or `npm run dev:realtime`)
+- Presence panel, composer (viewers blocked), timeline replay
 
 ---
 
@@ -36,8 +37,8 @@
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Setup & learning | **complete** |
-| 1 | Foundation (auth, workspace, incident CRUD) | **in progress** |
-| 2 | Multiplayer shell (WebSocket, timeline) | not started |
+| 1 | Foundation (auth, workspace, session CRUD) | **complete** |
+| 2 | Multiplayer shell (WebSocket, timeline) | **in progress** |
 | 3 | Agent v1 (queue, tools, streaming) | not started |
 | 4 | Collaboration MVP (redirect, diff, approval, handoff) | not started |
 | 5 | Engineering depth (private repos, sandbox, PR) | not started |
@@ -49,19 +50,30 @@
 
 ## What to build in current phase only
 
-### Phase 1 (now)
+### Phase 2 (now)
 
-- Prisma + Postgres schema: `users`, `workspaces`, `workspace_members`, `sessions`
-- Auth (sign up / sign in) via Supabase
-- Workspace creation
-- Session CRUD API (`/api/v1/sessions`)
-- UI: session list page, create session form (types: on-call, feature, bug, testing)
+- Session room at `/sessions/:id`
+- WebSocket gateway + Redis pub/sub (`session:{id}`)
+- Presence, human messages, append-only event log, timeline replay
+- Share link; session roles viewer / contributor / owner
 
 ### Do NOT build yet
 
-- WebSockets / presence (Phase 2)
 - Agent runs / BullMQ (Phase 3)
-- Live session room / timeline / approvals (Phase 4)
+- Redirect, artifacts, approvals, handoff, status machine (Phase 4)
+
+---
+
+## Phase 1 completion record
+
+All exit criteria met on 2026-08-20:
+
+- [x] User can sign in and create a workspace
+- [x] User can create and list sessions
+- [x] Session data persists across refresh
+- [x] Basic role on workspace: admin | member
+
+Also shipped: add workspace members by email (admin-only); session PATCH + detail/room page.
 
 ---
 

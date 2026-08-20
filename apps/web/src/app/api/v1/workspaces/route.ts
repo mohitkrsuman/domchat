@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPrimaryWorkspace, requireUser } from "@/lib/auth";
+import { getPrimaryWorkspace, jsonError, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
@@ -8,8 +8,14 @@ export async function GET() {
     const membership = await getPrimaryWorkspace(user.id);
 
     if (!membership) {
-      return NextResponse.json({ workspace: null, membership: null });
+      return NextResponse.json({ workspace: null, membership: null, members: [] });
     }
+
+    const members = await prisma.workspaceMember.findMany({
+      where: { workspaceId: membership.workspaceId },
+      include: { user: { select: { id: true, email: true, name: true } } },
+      orderBy: { createdAt: "asc" },
+    });
 
     return NextResponse.json({
       workspace: membership.workspace,
@@ -18,12 +24,17 @@ export async function GET() {
         userId: membership.userId,
         workspaceId: membership.workspaceId,
       },
+      members: members.map((m) => ({
+        userId: m.user.id,
+        email: m.user.email,
+        name: m.user.name,
+        role: m.role,
+        createdAt: m.createdAt,
+      })),
     });
   } catch (e) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.json({ error: "Failed to load workspace" }, { status: 500 });
+    const { body, status } = jsonError(e, "Failed to load workspace");
+    return NextResponse.json(body, { status });
   }
 }
 
@@ -59,9 +70,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ workspace }, { status: 201 });
   } catch (e) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.json({ error: "Failed to create workspace" }, { status: 500 });
+    const { body, status } = jsonError(e, "Failed to create workspace");
+    return NextResponse.json(body, { status });
   }
 }

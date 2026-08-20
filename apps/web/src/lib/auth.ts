@@ -56,3 +56,26 @@ export async function getPrimaryWorkspace(userId: string) {
 
   return membership;
 }
+
+export async function requireWorkspace(userId: string) {
+  const membership = await getPrimaryWorkspace(userId);
+  if (!membership) {
+    throw new Error("NO_WORKSPACE");
+  }
+  return membership;
+}
+
+export function jsonError(error: unknown, fallback: string) {
+  if (error instanceof Error) {
+    if (error.message === "UNAUTHORIZED") {
+      return { body: { error: "Unauthorized" }, status: 401 };
+    }
+    if (error.message === "NO_WORKSPACE") {
+      return { body: { error: "Create a workspace first" }, status: 400 };
+    }
+    if (error.message === "FORBIDDEN") {
+      return { body: { error: "Forbidden" }, status: 403 };
+    }
+  }
+  return { body: { error: fallback }, status: 500 };
+}

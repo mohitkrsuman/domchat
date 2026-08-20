@@ -85,7 +85,7 @@ export default function LoginPage() {
   return (
     <main className="page-narrow">
       <AppChrome />
-      <p className="eyebrow">Phase 1 — Foundation</p>
+      <p className="eyebrow">Phase 2 — Multiplayer</p>
       <h1 className="title">Sign in</h1>
       <p className="subtitle">
         No account?{" "}

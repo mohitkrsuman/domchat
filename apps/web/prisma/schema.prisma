@@ -33,6 +33,12 @@ enum SessionStatus {
   resolved
 }
 
+enum SessionParticipantRole {
+  viewer
+  contributor
+  owner
+}
+
 model User {
   id         String   @id @default(cuid())
   supabaseId String   @unique @map("supabase_id")
@@ -40,9 +46,11 @@ model User {
   name       String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  memberships      WorkspaceMember[]
-  ownedSessions    Session[]         @relation("SessionOwner")
-  createdSessions  Session[]         @relation("SessionCreator")
+  memberships           WorkspaceMember[]
+  ownedSessions         Session[]              @relation("SessionOwner")
+  createdSessions       Session[]              @relation("SessionCreator")
+  sessionParticipations SessionParticipant[]
+  sessionEvents         SessionEvent[]
 
   @@map("users")
 }
@@ -88,7 +96,37 @@ model Session {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   owner     User      @relation("SessionOwner", fields: [ownerId], references: [id])
   createdBy User      @relation("SessionCreator", fields: [createdById], references: [id])
+  participants SessionParticipant[]
+  events       SessionEvent[]
 
   @@index([workspaceId])
   @@map("sessions")
+}
+
+model SessionParticipant {
+  sessionId String                 @map("session_id")
+  userId    String                 @map("user_id")
+  role      SessionParticipantRole
+  joinedAt  DateTime               @default(now()) @map("joined_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, userId])
+  @@map("session_participants")
+}
+
+model SessionEvent {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  type      String
+  actorId   String?  @map("actor_id")
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  actor   User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, createdAt])
+  @@map("session_events")
 }

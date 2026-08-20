@@ -17,7 +17,7 @@ export default async function HomePage() {
     <main className="page">
       <AppChrome />
       <header className="mt-16 max-w-xl">
-        <p className="eyebrow">Phase 1 — Foundation</p>
+        <p className="eyebrow">Phase 2 — Multiplayer</p>
         <h1 className="title text-4xl tracking-[0.08em]">DOOMCHAT</h1>
         <p className="subtitle mt-3 text-base">
           Shared agent sessions for teams — on-call, features, bugs, and testing, together

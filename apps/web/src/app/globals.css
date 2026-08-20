@@ -201,4 +201,24 @@
   .list > li {
     border-color: var(--border);
   }
+
+  .room-grid {
+    @apply mt-8 grid gap-6;
+  }
+
+  @media (min-width: 768px) {
+    .room-grid {
+      grid-template-columns: 16rem minmax(0, 1fr);
+    }
+  }
+
+  .timeline {
+    @apply flex max-h-[28rem] flex-col gap-3 overflow-y-auto p-4;
+  }
+
+  .badge {
+    @apply rounded-full border px-2 py-0.5 text-xs capitalize;
+    border-color: var(--border);
+    color: var(--muted);
+  }
 }

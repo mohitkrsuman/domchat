@@ -2,7 +2,7 @@
 
 Multiplayer AI agent workspace — shared live sessions where teams investigate, redirect, and hand off agent work together.
 
-**Current phase:** Phase 1 — Foundation  
+**Current phase:** Phase 2 — Multiplayer shell  
 **Status tracker:** [PROJECT_STATUS.md](./PROJECT_STATUS.md)
 
 ## Docs
@@ -47,13 +47,16 @@ If Docker is not installed, skip this step for now — the app still runs; healt
 ```bash
 cd apps/web
 npm install
-npm run db:migrate   # first time / after schema changes
-npm run dev          # default :3000 — or npm run dev -- -p 4000
+npm run db:push      # first time / after schema changes
+cp .env.example .env.local   # add Supabase keys + REDIS_URL
+npm run dev:all      # Next.js + realtime WebSocket server
 ```
+
+`dev:all` starts the Next.js app and the realtime server (`ws://localhost:4001`). You can also run them separately: `npm run dev` and `npm run dev:realtime`.
 
 Open the app URL from your terminal (often [http://localhost:3000](http://localhost:3000) or `:4000`).
 
-**Phase 1 flow:** Sign up → create workspace → New incident → refresh → incident still listed.
+**Phase 2 flow:** Sign up → create workspace → add a teammate by email → New session → open the room in two browsers → chat live → refresh restores the timeline.
 
 **Supabase tip:** For local testing, in Supabase Dashboard → Authentication → Providers → Email, you can disable “Confirm email” so sign-up creates a session immediately.
 
