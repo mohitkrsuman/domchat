@@ -4,22 +4,20 @@
 
 ---
 
-## Current phase: **Phase 0 — Setup & Learning**
+## Current phase: **Phase 1 — Foundation**
 
-**Started:** 2026-08-20  
-**Target:** Dev stack running + Phase 0 spike complete
+**Phase 0 completed:** 2026-08-20  
+**Phase 1 started:** 2026-08-20  
+**Target:** Auth, workspace, incident CRUD (no agent, no realtime)
 
 ---
 
-## Phase 0 exit criteria
+## Phase 1 exit criteria
 
-- [x] Next.js app scaffolded and builds (`cd apps/web && npm run build`)
-- [x] Agent skills and rules created (`.cursor/skills/domchat-phases`, `.cursor/rules/`)
-- [ ] Docker: Postgres and Redis running locally (`docker compose ps` healthy) — **requires Docker Desktop**
-- [ ] `.env` configured: copy `apps/web/.env.example` → `apps/web/.env.local` and add LLM key
-- [ ] App runs (`cd apps/web && npm run dev`)
-- [ ] LLM streaming works in browser at http://localhost:3000
-- [ ] Core concepts understood: session, event, run, artifact, redirect, handoff
+- [ ] User can sign in and create a workspace
+- [ ] User can create and list incidents
+- [ ] Incident data persists across refresh
+- [ ] Basic role on workspace: admin | member
 
 ---
 
@@ -27,8 +25,8 @@
 
 | Phase | Name | Status |
 |---|---|---|
-| 0 | Setup & learning | **in progress** |
-| 1 | Foundation (auth, workspace, incident CRUD) | not started |
+| 0 | Setup & learning | **complete** |
+| 1 | Foundation (auth, workspace, incident CRUD) | **in progress** |
 | 2 | Multiplayer shell (WebSocket, timeline) | not started |
 | 3 | Agent v1 (queue, tools, streaming) | not started |
 | 4 | Collaboration MVP (redirect, diff, approval, handoff) | not started |
@@ -41,19 +39,33 @@
 
 ## What to build in current phase only
 
-### Phase 0 (now)
+### Phase 1 (now)
 
-- Docker Compose for Postgres + Redis
-- Next.js spike app with health check
-- Streaming LLM API route (`/api/spike/stream`)
-- Project docs, agent skills, and rules
+- Prisma + Postgres schema: `users`, `workspaces`, `workspace_members`, `incidents`
+- Auth (sign up / sign in)
+- Workspace creation
+- Incident CRUD API (`/api/v1/incidents`)
+- UI: incident list page, create incident form
 
 ### Do NOT build yet
 
-- Auth / workspaces (Phase 1)
 - WebSockets / presence (Phase 2)
 - Agent runs / BullMQ (Phase 3)
-- Incidents room / approvals (Phase 4)
+- Incident room / timeline / approvals (Phase 4)
+
+---
+
+## Phase 0 completion record
+
+All exit criteria met on 2026-08-20:
+
+- [x] Next.js app scaffolded and builds
+- [x] Agent skills and rules created
+- [x] Docker: Postgres and Redis running locally
+- [x] `.env` configured with LLM key
+- [x] App runs (`npm run dev`)
+- [x] LLM streaming works in browser
+- [x] Core concepts understood: session, event, run, artifact, redirect, handoff
 
 ---
 

@@ -2,7 +2,7 @@
 
 Multiplayer AI agent workspace — shared live sessions where teams investigate, redirect, and hand off agent work together.
 
-**Current phase:** Phase 0 — Setup & Learning  
+**Current phase:** Phase 1 — Foundation  
 **Status tracker:** [PROJECT_STATUS.md](./PROJECT_STATUS.md)
 
 ## Docs
