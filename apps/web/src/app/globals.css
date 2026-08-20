@@ -189,6 +189,10 @@
     @apply mb-10 flex items-center justify-between gap-4;
   }
 
+  .page-room .app-header {
+    @apply mb-4;
+  }
+
   .brand {
     @apply text-sm font-semibold tracking-[0.14em];
   }
@@ -203,17 +207,72 @@
   }
 
   .room-grid {
-    @apply mt-8 grid gap-6;
+    @apply grid min-h-0 flex-1 gap-4;
+    grid-template-rows: minmax(10rem, 30%) minmax(0, 1fr);
   }
 
   @media (min-width: 768px) {
     .room-grid {
       grid-template-columns: 16rem minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+      align-items: stretch;
     }
   }
 
+  .page-room {
+    @apply mx-auto flex h-[100dvh] max-w-6xl flex-col overflow-hidden px-6 py-6;
+  }
+
+  .room-header {
+    @apply shrink-0;
+  }
+
+  .room-sidebar {
+    @apply flex min-h-0 flex-col overflow-hidden;
+  }
+
+  .room-sidebar-header {
+    @apply shrink-0 border-b px-4 py-3;
+    border-color: var(--border);
+  }
+
+  .room-sidebar-list {
+    @apply min-h-0 flex-1 space-y-3 overflow-y-auto p-4;
+  }
+
+  .room-chat {
+    @apply card flex min-h-0 min-w-0 flex-col overflow-hidden;
+  }
+
+  .room-chat-header {
+    @apply shrink-0 border-b px-4 py-3;
+    border-color: var(--border);
+  }
+
+  .room-timeline-scroll {
+    @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4;
+  }
+
   .timeline {
-    @apply flex max-h-[28rem] flex-col gap-3 overflow-y-auto p-4;
+    @apply flex flex-col gap-3;
+  }
+
+  .room-composer {
+    @apply shrink-0 border-t p-3;
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--bg) 55%, var(--bg-elevated));
+  }
+
+  .room-composer-form {
+    @apply flex items-end gap-2;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 z-40 flex items-end justify-center bg-black/40 p-4 sm:items-center;
+  }
+
+  .modal-panel {
+    @apply card max-h-[85dvh] w-full max-w-lg overflow-y-auto p-5;
   }
 
   .badge {

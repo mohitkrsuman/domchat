@@ -56,6 +56,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [changingUserId, setChangingUserId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [type, setType] = useState<SessionTypeValue>("other");
@@ -155,6 +156,17 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   const viewerBlocked = !canSendMessages(me?.role);
   const owner = isSessionOwner(me?.role);
 
+  function openEdit() {
+    if (!session) return;
+    setTitle(session.title);
+    setType(session.type);
+    setRepoUrl(session.repoUrl ?? "");
+    setSeverity(session.severity ?? "");
+    setStatus(session.status);
+    setError(null);
+    setEditing(true);
+  }
+
   async function onSave(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -180,6 +192,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
       }
       setSession((prev) => (prev ? { ...prev, ...data.session, participants: prev.participants } : data.session));
       toast("Session saved");
+      setEditing(false);
     } catch {
       const msg = "Failed to update session";
       setError(msg);
@@ -248,35 +261,37 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <main className="page max-w-6xl">
-      <AppChrome>
-        <Link href="/sessions" className="btn-secondary">
-          All sessions
-        </Link>
-      </AppChrome>
+    <main className="page-room">
+      <div className="room-header">
+        <AppChrome>
+          <Link href="/sessions" className="btn-secondary">
+            All sessions
+          </Link>
+        </AppChrome>
+      </div>
 
       {loading && <SessionRoomSkeleton />}
-      {!loading && !session && error && <p className="error-text mt-6">{error}</p>}
+      {!loading && !session && error && <p className="error-text">{error}</p>}
       {!loading && session && (
         <>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
+          <div className="room-header mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="eyebrow">Session room</p>
-              <h1 className="title">{session.title}</h1>
-              <p className="subtitle">
+              <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">{session.title}</h1>
+              <p className="subtitle mt-1 truncate">
                 {SESSION_TYPE_LABELS[session.type]}
                 {session.severity ? ` · ${session.severity}` : ""}
                 {` · ${session.status}`}
                 {` · owner ${session.owner.name || session.owner.email}`}
               </p>
             </div>
-            <div className="flex flex-col items-end gap-1">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <button type="button" onClick={openEdit} className="btn-secondary">
+                Edit session
+              </button>
               <button type="button" onClick={copyShareLink} disabled={copying} className="btn-secondary">
                 {copying ? <ButtonLoader label="Copying…" /> : "Copy share link"}
               </button>
-              <p className="subtitle text-right text-xs">
-                Teammates open the link or use Join session
-              </p>
             </div>
           </div>
 
@@ -290,109 +305,149 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               changingUserId={changingUserId}
               realtimeStatus={realtimeStatus}
             />
-            <section>
-              <h2 className="text-sm font-medium">Timeline</h2>
-              <div className="mt-3">
-                <Timeline events={events} />
+            <section className="room-chat">
+              <div className="room-chat-header">
+                <h2 className="text-sm font-medium">Timeline</h2>
               </div>
-              <Composer disabled={viewerBlocked} sending={sending} onSend={onSend} />
-              {viewerBlocked && (
-                <p className="subtitle">Viewers cannot send messages.</p>
-              )}
+              <Timeline events={events} />
+              <div className="room-composer">
+                <Composer disabled={viewerBlocked} sending={sending} onSend={onSend} />
+                {viewerBlocked && (
+                  <p className="subtitle mt-2 text-xs">Viewers cannot send messages.</p>
+                )}
+              </div>
             </section>
           </div>
 
-          <details className="mt-10">
-            <summary className="cursor-pointer text-sm font-medium">Edit session details</summary>
-            <form onSubmit={onSave} className="mt-4 max-w-xl space-y-4">
-              <div>
-                <label className="label" htmlFor="title">
-                  Title
-                </label>
-                <input
-                  id="title"
-                  required
-                  disabled={saving}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="input"
-                />
-              </div>
-              <div>
-                <label className="label" htmlFor="type">
-                  Type
-                </label>
-                <select
-                  id="type"
-                  disabled={saving}
-                  value={type}
-                  onChange={(e) => setType(e.target.value as SessionTypeValue)}
-                  className="input"
-                >
-                  {SESSION_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {SESSION_TYPE_LABELS[t]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="label" htmlFor="repoUrl">
-                  Repo URL <span className="muted">(optional)</span>
-                </label>
-                <input
-                  id="repoUrl"
-                  type="url"
-                  disabled={saving}
-                  value={repoUrl}
-                  onChange={(e) => setRepoUrl(e.target.value)}
-                  placeholder="https://github.com/acme/payments-api"
-                  className="input"
-                />
-              </div>
-              {showSeverity && (
-                <div>
-                  <label className="label" htmlFor="severity">
-                    Severity
-                  </label>
-                  <select
-                    id="severity"
+          {editing && (
+            <div
+              className="modal-backdrop"
+              role="presentation"
+              onClick={() => {
+                if (!saving) setEditing(false);
+              }}
+            >
+              <div
+                className="modal-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="edit-session-title"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <h2 id="edit-session-title" className="text-lg font-semibold">
+                    Edit session
+                  </h2>
+                  <button
+                    type="button"
+                    className="btn-ghost px-2"
                     disabled={saving}
-                    value={severity}
-                    onChange={(e) => setSeverity(e.target.value)}
-                    className="input"
+                    onClick={() => setEditing(false)}
                   >
-                    <option value="">None</option>
-                    <option value="sev1">sev1</option>
-                    <option value="sev2">sev2</option>
-                    <option value="sev3">sev3</option>
-                  </select>
+                    Close
+                  </button>
                 </div>
-              )}
-              <div>
-                <label className="label" htmlFor="status">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  disabled={saving}
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as SessionStatusValue)}
-                  className="input"
-                >
-                  {SESSION_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                <form onSubmit={onSave} className="space-y-4">
+                  <div>
+                    <label className="label" htmlFor="title">
+                      Title
+                    </label>
+                    <input
+                      id="title"
+                      required
+                      disabled={saving}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="label" htmlFor="type">
+                      Type
+                    </label>
+                    <select
+                      id="type"
+                      disabled={saving}
+                      value={type}
+                      onChange={(e) => setType(e.target.value as SessionTypeValue)}
+                      className="input"
+                    >
+                      {SESSION_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {SESSION_TYPE_LABELS[t]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label" htmlFor="repoUrl">
+                      Repo URL <span className="muted">(optional)</span>
+                    </label>
+                    <input
+                      id="repoUrl"
+                      type="url"
+                      disabled={saving}
+                      value={repoUrl}
+                      onChange={(e) => setRepoUrl(e.target.value)}
+                      placeholder="https://github.com/acme/payments-api"
+                      className="input"
+                    />
+                  </div>
+                  {showSeverity && (
+                    <div>
+                      <label className="label" htmlFor="severity">
+                        Severity
+                      </label>
+                      <select
+                        id="severity"
+                        disabled={saving}
+                        value={severity}
+                        onChange={(e) => setSeverity(e.target.value)}
+                        className="input"
+                      >
+                        <option value="">None</option>
+                        <option value="sev1">sev1</option>
+                        <option value="sev2">sev2</option>
+                        <option value="sev3">sev3</option>
+                      </select>
+                    </div>
+                  )}
+                  <div>
+                    <label className="label" htmlFor="status">
+                      Status
+                    </label>
+                    <select
+                      id="status"
+                      disabled={saving}
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value as SessionStatusValue)}
+                      className="input"
+                    >
+                      {SESSION_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {error && <p className="error-text">{error}</p>}
+                  <div className="flex flex-wrap gap-2">
+                    <button type="submit" disabled={saving} className="btn-primary">
+                      {saving ? <ButtonLoader label="Saving…" /> : "Save changes"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      className="btn-secondary"
+                      onClick={() => setEditing(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
-              {error && <p className="error-text">{error}</p>}
-              <button type="submit" disabled={saving} className="btn-primary">
-                {saving ? <ButtonLoader label="Saving…" /> : "Save changes"}
-              </button>
-            </form>
-          </details>
+            </div>
+          )}
         </>
       )}
     </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, KeyboardEvent, useState } from "react";
 import { ButtonLoader } from "@/components/ui";
 
 export function Composer({
@@ -14,29 +14,39 @@ export function Composer({
 }) {
   const [text, setText] = useState("");
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function submit() {
     const value = text.trim();
-    if (!value) return;
+    if (!value || disabled || sending) return;
     const ok = await onSend(value);
     if (ok) setText("");
   }
 
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    await submit();
+  }
+
+  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void submit();
+    }
+  }
+
   return (
-    <form onSubmit={onSubmit} className="mt-4 space-y-3">
-      <label className="label" htmlFor="message">
-        Message
-      </label>
+    <form onSubmit={onSubmit} className="room-composer-form">
       <textarea
         id="message"
-        rows={3}
+        rows={2}
         disabled={disabled || sending}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={disabled ? "Viewers cannot send messages" : "Write a message to the room"}
-        className="input min-h-[5rem] resize-y"
+        onKeyDown={onKeyDown}
+        placeholder={disabled ? "Viewers cannot send messages" : "Message the room…"}
+        className="input mt-0 min-h-[2.75rem] resize-none"
+        aria-label="Message"
       />
-      <button type="submit" disabled={disabled || sending || !text.trim()} className="btn-primary">
+      <button type="submit" disabled={disabled || sending || !text.trim()} className="btn-primary shrink-0">
         {sending ? <ButtonLoader label="Sending…" /> : "Send"}
       </button>
     </form>

@@ -35,12 +35,14 @@ export function PresencePanel({
         : "Offline — run npm run dev:realtime";
 
   return (
-    <aside className="card p-4">
-      <h2 className="text-sm font-medium">Participants</h2>
-      <p className="subtitle mt-1">
-        {onlineIds.size} in the room · {liveLabel}
-      </p>
-      <ul className="mt-4 space-y-3">
+    <aside className="room-sidebar card">
+      <div className="room-sidebar-header">
+        <h2 className="text-sm font-medium">Participants</h2>
+        <p className="subtitle mt-1">
+          {onlineIds.size} in the room · {liveLabel}
+        </p>
+      </div>
+      <ul className="room-sidebar-list">
         {participants.map((p) => {
           const online = onlineIds.has(p.userId);
           const label = p.user.name || p.user.email;
@@ -48,14 +50,14 @@ export function PresencePanel({
           return (
             <li key={p.userId} className="text-sm">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">
                     {label}
                     {p.userId === currentUserId ? " (you)" : ""}
                   </p>
                   <p className="text-xs muted">{online ? "online" : "offline"}</p>
                 </div>
-                {!canEdit && <span className="badge">{p.role}</span>}
+                {!canEdit && <span className="badge shrink-0">{p.role}</span>}
               </div>
               {canEdit && (
                 <div className="mt-2">
