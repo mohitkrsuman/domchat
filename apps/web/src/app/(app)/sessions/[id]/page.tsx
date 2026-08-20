@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, use, useCallback, useEffect, useState } from "react";
-import { AppChrome } from "@/components/app-chrome";
 import { SessionRoomSkeleton } from "@/components/skeletons";
 import { Composer } from "@/components/session-room/composer";
 import { PresencePanel } from "@/components/session-room/presence-panel";
@@ -311,14 +310,6 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="page-room">
-      <div className="room-header">
-        <AppChrome>
-          <Link href="/sessions" className="btn-secondary">
-            All sessions
-          </Link>
-        </AppChrome>
-      </div>
-
       {loading && <SessionRoomSkeleton />}
       {!loading && !session && error && <p className="error-text">{error}</p>}
       {!loading && session && (
@@ -335,6 +326,9 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Link href="/sessions" className="btn-secondary">
+                All sessions
+              </Link>
               <button type="button" onClick={openEdit} className="btn-secondary">
                 Edit
               </button>

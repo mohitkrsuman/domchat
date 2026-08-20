@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { AppChrome } from "@/components/app-chrome";
 import { useToast } from "@/components/toast";
 import { SESSION_TYPE_LABELS, SESSION_TYPES } from "@/lib/session-fields";
 import { ButtonLoader } from "@/components/ui";
@@ -59,8 +58,8 @@ export default function NewSessionPage() {
   }
 
   return (
-    <main className="page max-w-xl">
-      <AppChrome />
+    <main className="page-app">
+      <div className="max-w-xl">
       <Link href="/sessions" className="btn-ghost px-0">
         ← Back to sessions
       </Link>
@@ -140,6 +139,7 @@ export default function NewSessionPage() {
           {loading ? <ButtonLoader label="Creating…" /> : "Create session"}
         </button>
       </form>
+      </div>
     </main>
   );
 }

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { AppChrome } from "@/components/app-chrome";
 import { useToast } from "@/components/toast";
 import { ButtonLoader } from "@/components/ui";
 import { parseSessionIdInput } from "@/lib/session-link";
@@ -54,38 +53,39 @@ export default function JoinSessionPage() {
   }
 
   return (
-    <main className="page max-w-xl">
-      <AppChrome />
-      <Link href="/sessions" className="btn-ghost px-0">
-        ← Back to sessions
-      </Link>
-      <h1 className="title">Join session</h1>
-      <p className="subtitle">
-        Paste a share link from a teammate. An admin must invite you to that workspace first
-        (Workspace → Add member).
-      </p>
+    <main className="page-app">
+      <div className="max-w-xl">
+        <Link href="/sessions" className="btn-ghost px-0">
+          ← Back to sessions
+        </Link>
+        <h1 className="title">Join session</h1>
+        <p className="subtitle">
+          Paste a share link from a teammate. An admin must invite you to that workspace first
+          (Workspace → Add member).
+        </p>
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
-        <div>
-          <label className="label" htmlFor="sessionLink">
-            Session link or id
-          </label>
-          <input
-            id="sessionLink"
-            required
-            disabled={loading}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="https://…/sessions/… or session id"
-            className="input"
-            autoFocus
-          />
-        </div>
-        {error && <p className="error-text">{error}</p>}
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? <ButtonLoader label="Joining…" /> : "Join session"}
-        </button>
-      </form>
+        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+          <div>
+            <label className="label" htmlFor="sessionLink">
+              Session link or id
+            </label>
+            <input
+              id="sessionLink"
+              required
+              disabled={loading}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="https://…/sessions/… or session id"
+              className="input"
+              autoFocus
+            />
+          </div>
+          {error && <p className="error-text">{error}</p>}
+          <button type="submit" disabled={loading} className="btn-primary">
+            {loading ? <ButtonLoader label="Joining…" /> : "Join session"}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }

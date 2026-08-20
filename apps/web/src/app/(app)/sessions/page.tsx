@@ -3,12 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AppChrome } from "@/components/app-chrome";
 import { PageHeaderSkeleton, SessionsListSkeleton } from "@/components/skeletons";
 import { useToast } from "@/components/toast";
-import { Spinner } from "@/components/ui";
 import { SESSION_TYPE_LABELS } from "@/lib/session-fields";
-import { createClient } from "@/lib/supabase/client";
 
 type Session = {
   id: string;
@@ -34,7 +31,6 @@ export default function SessionsPage() {
   const [role, setRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -71,43 +67,8 @@ export default function SessionsPage() {
     void load();
   }, [router, toast]);
 
-  async function signOut() {
-    setSigningOut(true);
-    try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      toast("Signed out");
-      router.push("/login");
-      router.refresh();
-    } catch {
-      toast("Failed to sign out", "error");
-      setSigningOut(false);
-    }
-  }
-
   return (
-    <main className="page max-w-4xl">
-      <AppChrome>
-        <Link href="/workspace" className="btn-secondary">
-          Workspace
-        </Link>
-        <Link href="/sessions/join" className="btn-secondary">
-          Join session
-        </Link>
-        <Link href="/sessions/new" className="btn-primary">
-          New session
-        </Link>
-        <button onClick={signOut} disabled={signingOut} className="btn-secondary">
-          {signingOut ? (
-            <span className="inline-flex items-center gap-2">
-              <Spinner /> Signing out…
-            </span>
-          ) : (
-            "Sign out"
-          )}
-        </button>
-      </AppChrome>
-
+    <main className="page-app">
       <header>
         {loading ? (
           <PageHeaderSkeleton />

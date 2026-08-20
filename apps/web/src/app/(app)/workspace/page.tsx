@@ -1,9 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AppChrome } from "@/components/app-chrome";
 import { FormPageSkeleton } from "@/components/skeletons";
 import { useToast } from "@/components/toast";
 import { ButtonLoader } from "@/components/ui";
@@ -126,17 +124,18 @@ export default function WorkspacePage() {
 
   if (checking) {
     return (
-      <main className="page-narrow">
-        <AppChrome />
-        <FormPageSkeleton />
+      <main className="page-app">
+        <div className="mx-auto max-w-md">
+          <FormPageSkeleton />
+        </div>
       </main>
     );
   }
 
   if (!workspaceName) {
     return (
-      <main className="page-narrow">
-        <AppChrome />
+      <main className="page-app">
+        <div className="mx-auto max-w-md">
         <p className="eyebrow">Workspace</p>
         <h1 className="title">Create workspace</h1>
         <p className="subtitle">
@@ -164,6 +163,7 @@ export default function WorkspacePage() {
             {loading ? <ButtonLoader label="Creating…" /> : "Create workspace"}
           </button>
         </form>
+        </div>
       </main>
     );
   }
@@ -171,12 +171,8 @@ export default function WorkspacePage() {
   const isAdmin = role === "admin";
 
   return (
-    <main className="page max-w-xl">
-      <AppChrome>
-        <Link href="/sessions" className="btn-secondary">
-          Sessions
-        </Link>
-      </AppChrome>
+    <main className="page-app">
+      <div className="max-w-xl">
       <p className="eyebrow">Workspace</p>
       <h1 className="title">{workspaceName}</h1>
       <p className="subtitle">Your role: {role}</p>
@@ -243,6 +239,7 @@ export default function WorkspacePage() {
       ) : (
         <p className="subtitle mt-8">Only workspace admins can add members.</p>
       )}
+      </div>
     </main>
   );
 }

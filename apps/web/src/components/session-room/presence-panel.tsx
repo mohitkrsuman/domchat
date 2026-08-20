@@ -55,7 +55,7 @@ export function PresencePanel({
         : "Offline — run npm run dev:realtime";
 
   return (
-    <aside className="room-sidebar card">
+    <aside className="room-sidebar">
       <div className="room-sidebar-header">
         <h2 className="text-sm font-medium">Participants</h2>
         <p className="subtitle mt-1">
