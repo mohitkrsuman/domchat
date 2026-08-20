@@ -1,4 +1,4 @@
-# DomChat
+# DoomChat
 
 Multiplayer AI agent workspace — shared live sessions where teams investigate, redirect, and hand off agent work together.
 
