@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { SessionSeverity, SessionStatus, SessionType } from "@prisma/client";
 import { jsonError, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { loadWorkspaceSession, sessionDetailInclude } from "@/lib/session-access";
+import {
+  loadWorkspaceSession,
+  sessionAccessError,
+  sessionDetailInclude,
+} from "@/lib/session-access";
 import { isSessionSeverity, isSessionStatus, isSessionType } from "@/lib/session-fields";
 
 type Params = { params: Promise<{ id: string }> };
@@ -11,12 +15,14 @@ export async function GET(_req: Request, { params }: Params) {
   try {
     const user = await requireUser();
     const { id } = await params;
-    const { session } = await loadWorkspaceSession(user.id, id);
+    const access = await loadWorkspaceSession(user.id, id);
 
-    if (!session) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!access.ok) {
+      const { body, status } = sessionAccessError(access);
+      return NextResponse.json(body, { status });
     }
 
+    const { session } = access;
     const me = session.participants.find((p) => p.userId === user.id) ?? null;
 
     return NextResponse.json({
@@ -33,11 +39,14 @@ export async function PATCH(req: Request, { params }: Params) {
   try {
     const user = await requireUser();
     const { id } = await params;
-    const { session: existing } = await loadWorkspaceSession(user.id, id);
+    const access = await loadWorkspaceSession(user.id, id);
 
-    if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!access.ok) {
+      const { body, status } = sessionAccessError(access);
+      return NextResponse.json(body, { status });
     }
+
+    const existing = access.session;
 
     const body = await req.json();
     const data: {

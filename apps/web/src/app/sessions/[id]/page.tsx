@@ -127,6 +127,9 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
           userId: joinData.participant.userId,
           role: joinData.participant.role,
         });
+        if (joinData.created) {
+          toast("Joined session");
+        }
 
         const eventsRes = await fetch(`/api/v1/sessions/${id}/events`);
         const eventsData = await eventsRes.json();
@@ -267,9 +270,14 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
                 {` · owner ${session.owner.name || session.owner.email}`}
               </p>
             </div>
-            <button type="button" onClick={copyShareLink} disabled={copying} className="btn-secondary">
-              {copying ? <ButtonLoader label="Copying…" /> : "Copy share link"}
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button type="button" onClick={copyShareLink} disabled={copying} className="btn-secondary">
+                {copying ? <ButtonLoader label="Copying…" /> : "Copy share link"}
+              </button>
+              <p className="subtitle text-right text-xs">
+                Teammates open the link or use Join session
+              </p>
+            </div>
           </div>
 
           <div className="room-grid">

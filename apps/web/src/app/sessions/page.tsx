@@ -91,6 +91,9 @@ export default function SessionsPage() {
         <Link href="/workspace" className="btn-secondary">
           Workspace
         </Link>
+        <Link href="/sessions/join" className="btn-secondary">
+          Join session
+        </Link>
         <Link href="/sessions/new" className="btn-primary">
           New session
         </Link>
@@ -124,11 +127,16 @@ export default function SessionsPage() {
           <div className="card-dashed">
             <p>No sessions yet.</p>
             <p className="subtitle mt-1">
-              Open a shared session for on-call, features, bugs, or testing.
+              Create one, or join a teammate with their share link.
             </p>
-            <Link href="/sessions/new" className="link mt-3 inline-block text-sm">
-              Create your first session
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-4 text-sm">
+              <Link href="/sessions/new" className="link">
+                Create your first session
+              </Link>
+              <Link href="/sessions/join" className="link">
+                Join with a link
+              </Link>
+            </div>
           </div>
         )}
         {!loading && sessions.length > 0 && (

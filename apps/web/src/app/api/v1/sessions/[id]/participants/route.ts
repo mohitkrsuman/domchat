@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { jsonError, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { SESSION_EVENT_TYPES } from "@/lib/realtime-protocol";
-import { loadWorkspaceSession, sessionDetailInclude } from "@/lib/session-access";
+import {
+  loadWorkspaceSession,
+  sessionAccessError,
+  sessionDetailInclude,
+} from "@/lib/session-access";
 import { appendSessionEvent } from "@/lib/session-events";
 import { isParticipantRole, isSessionOwner } from "@/lib/session-roles";
 
@@ -12,11 +16,14 @@ export async function PATCH(req: Request, { params }: Params) {
   try {
     const user = await requireUser();
     const { id } = await params;
-    const { session } = await loadWorkspaceSession(user.id, id);
+    const access = await loadWorkspaceSession(user.id, id);
 
-    if (!session) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!access.ok) {
+      const { body, status } = sessionAccessError(access);
+      return NextResponse.json(body, { status });
     }
+
+    const { session } = access;
 
     const me = session.participants.find((p) => p.userId === user.id);
     if (!isSessionOwner(me?.role)) {

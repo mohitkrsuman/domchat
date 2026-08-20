@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { jsonError, requireUser } from "@/lib/auth";
 import { SESSION_EVENT_TYPES } from "@/lib/realtime-protocol";
-import { loadWorkspaceSession } from "@/lib/session-access";
+import { loadWorkspaceSession, sessionAccessError } from "@/lib/session-access";
 import { appendSessionEvent } from "@/lib/session-events";
 import { canSendMessages } from "@/lib/session-roles";
 
@@ -11,11 +11,14 @@ export async function POST(req: Request, { params }: Params) {
   try {
     const user = await requireUser();
     const { id } = await params;
-    const { session } = await loadWorkspaceSession(user.id, id);
+    const access = await loadWorkspaceSession(user.id, id);
 
-    if (!session) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!access.ok) {
+      const { body, status } = sessionAccessError(access);
+      return NextResponse.json(body, { status });
     }
+
+    const { session } = access;
 
     const participant = session.participants.find((p) => p.userId === user.id);
     if (!canSendMessages(participant?.role)) {
