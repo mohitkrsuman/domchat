@@ -88,7 +88,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
     setPresence(users);
   }, []);
 
-  useSessionRealtime({
+  const { status: realtimeStatus } = useSessionRealtime({
     sessionId: id,
     enabled: !loading && Boolean(session) && Boolean(me),
     onEvent,
@@ -288,6 +288,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               isOwner={owner}
               onChangeRole={onChangeRole}
               changingUserId={changingUserId}
+              realtimeStatus={realtimeStatus}
             />
             <section>
               <h2 className="text-sm font-medium">Timeline</h2>

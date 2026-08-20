@@ -49,14 +49,16 @@ cd apps/web
 npm install
 npm run db:push      # first time / after schema changes
 cp .env.example .env.local   # add Supabase keys + REDIS_URL
-npm run dev:all      # Next.js + realtime WebSocket server
+npm run dev          # Next.js (:3000) + realtime WebSocket (:4001)
 ```
 
-`dev:all` starts the Next.js app and the realtime server (`ws://localhost:4001`). You can also run them separately: `npm run dev` and `npm run dev:realtime`.
+`npm run dev` starts **both** the Next.js app and the realtime server (`ws://localhost:4001`). Use `npm run dev:web` if you only want Next.js.
 
-Open the app URL from your terminal (often [http://localhost:3000](http://localhost:3000) or `:4000`).
+Open [http://localhost:3000](http://localhost:3000).
 
 **Phase 2 flow:** Sign up → create workspace → add a teammate by email → New session → open the room in two browsers → chat live → refresh restores the timeline.
+
+In the session room, Participants should show **Live** (not Offline). If it says Offline, the realtime process is not running.
 
 **Supabase tip:** For local testing, in Supabase Dashboard → Authentication → Providers → Email, you can disable “Confirm email” so sign-up creates a session immediately.
 

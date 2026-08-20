@@ -32,6 +32,7 @@ export type ClientToServer =
   | { type: "presence.ping" };
 
 export type ServerToClient =
+  | { type: "joined"; sessionId: string }
   | { type: "presence.update"; users: PresenceUser[] }
   | { type: "event.append"; event: TimelineEvent }
   | { type: "error"; code: string; message: string };

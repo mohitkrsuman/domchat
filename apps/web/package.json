@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:realtime": "tsx watch src/realtime/server.ts",
-    "dev:all": "concurrently -k \"npm run dev\" \"npm run dev:realtime\"",
+    "dev": "concurrently -k -n web,realtime -c cyan,magenta \"next dev\" \"npm run dev:realtime\"",
+    "dev:web": "next dev",
+    "dev:realtime": "tsx src/realtime/server.ts",
+    "dev:all": "npm run dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "start:realtime": "tsx src/realtime/server.ts",

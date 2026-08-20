@@ -27,7 +27,7 @@
 - Session GET/PATCH + `/sessions/[id]` room (metadata, share link, timeline)
 - `session_participants` (`viewer` | `contributor` | `owner`) and append-only `session_events`
 - REST: join, messages, events, participant role
-- WebSocket server + Redis pub/sub (`npm run dev:all` or `npm run dev:realtime`)
+- WebSocket server + Redis pub/sub (`npm run dev` starts Next + realtime; or `npm run dev:realtime`)
 - Presence panel, composer (viewers blocked), timeline replay
 
 ---

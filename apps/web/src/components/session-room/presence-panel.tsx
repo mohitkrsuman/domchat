@@ -16,6 +16,7 @@ export function PresencePanel({
   isOwner,
   onChangeRole,
   changingUserId,
+  realtimeStatus = "offline",
 }: {
   participants: Participant[];
   presence: PresenceUser[];
@@ -23,13 +24,22 @@ export function PresencePanel({
   isOwner: boolean;
   onChangeRole: (userId: string, role: "viewer" | "contributor") => void;
   changingUserId: string | null;
+  realtimeStatus?: "connecting" | "live" | "offline";
 }) {
   const onlineIds = new Set(presence.map((u) => u.id));
+  const liveLabel =
+    realtimeStatus === "live"
+      ? "Live"
+      : realtimeStatus === "connecting"
+        ? "Connecting…"
+        : "Offline — run npm run dev:realtime";
 
   return (
     <aside className="card p-4">
       <h2 className="text-sm font-medium">Participants</h2>
-      <p className="subtitle mt-1">{onlineIds.size} in the room</p>
+      <p className="subtitle mt-1">
+        {onlineIds.size} in the room · {liveLabel}
+      </p>
       <ul className="mt-4 space-y-3">
         {participants.map((p) => {
           const online = onlineIds.has(p.userId);
