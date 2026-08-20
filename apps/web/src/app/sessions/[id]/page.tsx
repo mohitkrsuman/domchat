@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, use, useCallback, useEffect, useState } from "react";
 import { AppChrome } from "@/components/app-chrome";
 import { SessionRoomSkeleton } from "@/components/skeletons";
@@ -46,6 +47,7 @@ type Me = { userId: string; role: Participant["role"] };
 
 export default function SessionRoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { toast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
   const [me, setMe] = useState<Me | null>(null);
@@ -58,6 +60,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   const [copying, setCopying] = useState(false);
   const [editing, setEditing] = useState(false);
   const [changingUserId, setChangingUserId] = useState<string | null>(null);
+  const [kickingUserId, setKickingUserId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [type, setType] = useState<SessionTypeValue>("other");
   const [repoUrl, setRepoUrl] = useState("");
@@ -83,17 +86,36 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
         setMe((prev) => (prev && prev.userId === userId ? { ...prev, role } : prev));
       }
     }
+    if (event.type === SESSION_EVENT_TYPES.participantRemoved) {
+      const userId = String(event.payload.userId ?? "");
+      if (userId) {
+        setSession((prev) =>
+          prev
+            ? {
+                ...prev,
+                participants: prev.participants.filter((p) => p.userId !== userId),
+              }
+            : prev
+        );
+      }
+    }
   }, []);
 
   const onPresence = useCallback((users: PresenceUser[]) => {
     setPresence(users);
   }, []);
 
+  const onKicked = useCallback(() => {
+    toast("You were removed from this session", "error");
+    router.replace("/sessions");
+  }, [router, toast]);
+
   const { status: realtimeStatus } = useSessionRealtime({
     sessionId: id,
     enabled: !loading && Boolean(session) && Boolean(me),
     onEvent,
     onPresence,
+    onKicked,
   });
 
   useEffect(() => {
@@ -260,6 +282,33 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  async function onKick(userId: string) {
+    const target = session?.participants.find((p) => p.userId === userId);
+    const label = target?.user.name || target?.user.email || "this member";
+    if (!window.confirm(`Remove ${label} from this session?`)) return;
+
+    setKickingUserId(userId);
+    try {
+      const res = await fetch(`/api/v1/sessions/${id}/participants`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error ?? "Failed to remove participant", "error");
+        return;
+      }
+      if (data.session) setSession(data.session);
+      if (data.event) onEvent(data.event);
+      toast("Participant removed");
+    } catch {
+      toast("Failed to remove participant", "error");
+    } finally {
+      setKickingUserId(null);
+    }
+  }
+
   return (
     <main className="page-room">
       <div className="room-header">
@@ -287,7 +336,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               <button type="button" onClick={openEdit} className="btn-secondary">
-                Edit session
+                Edit
               </button>
               <button type="button" onClick={copyShareLink} disabled={copying} className="btn-secondary">
                 {copying ? <ButtonLoader label="Copying…" /> : "Copy share link"}
@@ -302,7 +351,9 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               currentUserId={me?.userId ?? null}
               isOwner={owner}
               onChangeRole={onChangeRole}
+              onKick={onKick}
               changingUserId={changingUserId}
+              kickingUserId={kickingUserId}
               realtimeStatus={realtimeStatus}
             />
             <section className="room-chat">

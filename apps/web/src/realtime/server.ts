@@ -197,6 +197,15 @@ async function handleHttp(req: IncomingMessage, res: ServerResponse) {
         return;
       }
       fanout(body.sessionId, body.message);
+      if (body.message.type === "kicked") {
+        for (const c of [...clients]) {
+          if (c.sessionId === body.sessionId && c.userId === body.message.userId) {
+            clients.delete(c);
+            c.ws.close();
+          }
+        }
+        void broadcastPresence(body.sessionId);
+      }
       res.writeHead(204);
       res.end();
     } catch (err) {
@@ -233,6 +242,17 @@ function start() {
     try {
       message = JSON.parse(raw) as ServerToClient;
     } catch {
+      return;
+    }
+    if (message.type === "kicked") {
+      for (const c of [...clients]) {
+        if (c.sessionId === sessionId && c.userId === message.userId) {
+          send(c.ws, message);
+          clients.delete(c);
+          c.ws.close();
+        }
+      }
+      void broadcastPresence(sessionId);
       return;
     }
     fanout(sessionId, message);

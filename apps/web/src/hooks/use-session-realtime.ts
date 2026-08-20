@@ -15,16 +15,20 @@ export function useSessionRealtime({
   enabled,
   onEvent,
   onPresence,
+  onKicked,
 }: {
   sessionId: string;
   enabled: boolean;
   onEvent: (event: TimelineEvent) => void;
   onPresence: (users: PresenceUser[]) => void;
+  onKicked?: () => void;
 }) {
   const onEventRef = useRef(onEvent);
   const onPresenceRef = useRef(onPresence);
+  const onKickedRef = useRef(onKicked);
   onEventRef.current = onEvent;
   onPresenceRef.current = onPresence;
+  onKickedRef.current = onKicked;
   const [status, setStatus] = useState<RealtimeStatus>("offline");
 
   useEffect(() => {
@@ -84,6 +88,13 @@ export function useSessionRealtime({
         }
         if (message.type === "joined") {
           setStatus("live");
+          return;
+        }
+        if (message.type === "kicked") {
+          closed = true;
+          setStatus("offline");
+          onKickedRef.current?.();
+          ws.close();
           return;
         }
         if (message.type === "event.append") {

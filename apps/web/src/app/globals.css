@@ -237,7 +237,30 @@
   }
 
   .room-sidebar-list {
-    @apply min-h-0 flex-1 space-y-3 overflow-y-auto p-4;
+    @apply min-h-0 flex-1 space-y-1 overflow-y-auto p-2;
+  }
+
+  .participant-row {
+    @apply rounded-lg px-2 py-2;
+  }
+
+  .participant-row:hover {
+    background: color-mix(in srgb, var(--fg) 4%, transparent);
+  }
+
+  .participant-manage-toggle {
+    @apply shrink-0 rounded-md border px-2 py-1 text-xs font-medium transition disabled:opacity-50;
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+
+  .participant-manage-toggle:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+  }
+
+  .participant-manage-panel {
+    @apply mt-2 space-y-2 border-t pt-2;
+    border-color: var(--border);
   }
 
   .room-chat {
@@ -278,6 +301,79 @@
   .badge {
     @apply rounded-full border px-2 py-0.5 text-xs capitalize;
     border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .custom-select {
+    @apply relative mt-1;
+  }
+
+  .custom-select-trigger {
+    @apply flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm outline-none transition disabled:opacity-60;
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--fg);
+  }
+
+  .custom-select-trigger:hover:not(:disabled) {
+    border-color: var(--border-strong);
+  }
+
+  .custom-select-trigger:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+  }
+
+  .custom-select-value {
+    @apply flex min-w-0 flex-col;
+  }
+
+  .custom-select-value-label {
+    @apply truncate font-medium capitalize;
+  }
+
+  .custom-select-value-desc {
+    @apply truncate text-xs;
+    color: var(--muted);
+  }
+
+  .custom-select-chevron {
+    @apply shrink-0 text-xs transition-transform;
+    color: var(--muted);
+  }
+
+  .custom-select-chevron.is-open {
+    transform: rotate(180deg);
+  }
+
+  .custom-select-menu {
+    @apply z-50 overflow-hidden rounded-lg border py-1;
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    box-shadow: var(--shadow), 0 12px 28px rgb(0 0 0 / 0.12);
+  }
+
+  .custom-select-option {
+    @apply flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm transition;
+    color: var(--fg);
+  }
+
+  .custom-select-option:hover,
+  .custom-select-option:focus-visible {
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    outline: none;
+  }
+
+  .custom-select-option.is-selected {
+    background: var(--accent-soft);
+  }
+
+  .custom-select-option-label {
+    @apply capitalize;
+  }
+
+  .custom-select-option-desc {
+    @apply text-xs;
     color: var(--muted);
   }
 }

@@ -2,6 +2,7 @@ export const SESSION_EVENT_TYPES = {
   sessionCreated: "session.created",
   participantJoined: "participant.joined",
   participantLeft: "participant.left",
+  participantRemoved: "participant.removed",
   messageUser: "message.user",
   roleChanged: "participant.role_changed",
 } as const;
@@ -35,6 +36,7 @@ export type ServerToClient =
   | { type: "joined"; sessionId: string }
   | { type: "presence.update"; users: PresenceUser[] }
   | { type: "event.append"; event: TimelineEvent }
+  | { type: "kicked"; sessionId: string; userId: string }
   | { type: "error"; code: string; message: string };
 
 export function sessionChannel(sessionId: string) {

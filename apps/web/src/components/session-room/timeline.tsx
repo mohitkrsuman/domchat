@@ -17,6 +17,8 @@ function eventCopy(event: TimelineEvent) {
       return `joined as ${String(payload.role ?? "contributor")}`;
     case SESSION_EVENT_TYPES.participantLeft:
       return "left the room";
+    case SESSION_EVENT_TYPES.participantRemoved:
+      return `removed ${String(payload.name || payload.email || "a participant")} from the session`;
     case SESSION_EVENT_TYPES.messageUser:
       return String(payload.text ?? "");
     case SESSION_EVENT_TYPES.roleChanged:

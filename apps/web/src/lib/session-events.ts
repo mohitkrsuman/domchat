@@ -33,6 +33,8 @@ async function publishRealtime(sessionId: string, message: unknown) {
   }
 }
 
+export { publishRealtime };
+
 export async function appendSessionEvent(input: {
   sessionId: string;
   type: string;

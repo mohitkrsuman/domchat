@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { CustomSelect } from "@/components/custom-select";
 import type { PresenceUser } from "@/lib/realtime-protocol";
 import { ButtonLoader } from "@/components/ui";
 
@@ -9,13 +11,28 @@ type Participant = {
   user: { id: string; email: string; name: string | null };
 };
 
+const ROLE_OPTIONS = [
+  {
+    value: "contributor" as const,
+    label: "Contributor",
+    description: "Can send messages",
+  },
+  {
+    value: "viewer" as const,
+    label: "Viewer",
+    description: "Read-only in this room",
+  },
+];
+
 export function PresencePanel({
   participants,
   presence,
   currentUserId,
   isOwner,
   onChangeRole,
+  onKick,
   changingUserId,
+  kickingUserId,
   realtimeStatus = "offline",
 }: {
   participants: Participant[];
@@ -23,9 +40,12 @@ export function PresencePanel({
   currentUserId: string | null;
   isOwner: boolean;
   onChangeRole: (userId: string, role: "viewer" | "contributor") => void;
+  onKick: (userId: string) => void;
   changingUserId: string | null;
+  kickingUserId: string | null;
   realtimeStatus?: "connecting" | "live" | "offline";
 }) {
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
   const onlineIds = new Set(presence.map((u) => u.id));
   const liveLabel =
     realtimeStatus === "live"
@@ -46,41 +66,63 @@ export function PresencePanel({
         {participants.map((p) => {
           const online = onlineIds.has(p.userId);
           const label = p.user.name || p.user.email;
-          const canEdit = isOwner && p.role !== "owner" && p.userId !== currentUserId;
+          const canManage = isOwner && p.role !== "owner" && p.userId !== currentUserId;
+          const busy = changingUserId === p.userId || kickingUserId === p.userId;
+          const manageOpen = openUserId === p.userId;
+
           return (
-            <li key={p.userId} className="text-sm">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+            <li key={p.userId} className="participant-row text-sm">
+              <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">
                     {label}
                     {p.userId === currentUserId ? " (you)" : ""}
                   </p>
-                  <p className="text-xs muted">{online ? "online" : "offline"}</p>
+                  <p className="text-xs muted">
+                    <span className={online ? "text-[color:var(--success)]" : ""}>
+                      {online ? "online" : "offline"}
+                    </span>
+                    {" · "}
+                    <span className="capitalize">{p.role}</span>
+                  </p>
                 </div>
-                {!canEdit && <span className="badge shrink-0">{p.role}</span>}
-              </div>
-              {canEdit && (
-                <div className="mt-2">
-                  <label className="label" htmlFor={`role-${p.userId}`}>
-                    Role
-                  </label>
-                  <select
-                    id={`role-${p.userId}`}
-                    className="input"
-                    disabled={changingUserId === p.userId}
-                    value={p.role}
-                    onChange={(e) => {
-                      onChangeRole(p.userId, e.target.value as "viewer" | "contributor");
-                    }}
+                {canManage ? (
+                  <button
+                    type="button"
+                    className="participant-manage-toggle"
+                    aria-expanded={manageOpen}
+                    aria-controls={`manage-${p.userId}`}
+                    disabled={busy}
+                    onClick={() => setOpenUserId((id) => (id === p.userId ? null : p.userId))}
                   >
-                    <option value="contributor">contributor</option>
-                    <option value="viewer">viewer</option>
-                  </select>
+                    {manageOpen ? "Close" : "Manage"}
+                  </button>
+                ) : null}
+              </div>
+
+              {canManage && manageOpen && (
+                <div id={`manage-${p.userId}`} className="participant-manage-panel">
+                  <CustomSelect
+                    id={`role-${p.userId}`}
+                    label="Access"
+                    value={p.role === "owner" ? "contributor" : p.role}
+                    options={ROLE_OPTIONS}
+                    disabled={busy}
+                    onChange={(role) => onChangeRole(p.userId, role)}
+                  />
                   {changingUserId === p.userId && (
-                    <p className="mt-1 text-xs muted">
+                    <p className="text-xs muted">
                       <ButtonLoader label="Updating…" />
                     </p>
                   )}
+                  <button
+                    type="button"
+                    className="btn-secondary w-full"
+                    disabled={busy}
+                    onClick={() => onKick(p.userId)}
+                  >
+                    {kickingUserId === p.userId ? <ButtonLoader label="Removing…" /> : "Remove"}
+                  </button>
                 </div>
               )}
             </li>
