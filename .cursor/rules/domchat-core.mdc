@@ -1,0 +1,16 @@
+---
+description: DomChat core guardrails — read PROJECT_STATUS.md and follow phased roadmap; never skip ahead
+alwaysApply: true
+---
+
+# DomChat core guardrails
+
+1. **Read [PROJECT_STATUS.md](../../PROJECT_STATUS.md) first** — implement only what the current phase allows.
+2. **Follow phased order** in [docs/implementation-phases.md](../../docs/implementation-phases.md). Do not skip Phase 2–4.
+3. **Stack:** Next.js App Router, TypeScript, Tailwind, Postgres + Prisma, Redis. WebSockets Phase 2+, BullMQ Phase 3+.
+4. **Minimize scope** — no billing, SSO, CRM, sandbox, or GitHub App unless that phase is active.
+5. **Update PROJECT_STATUS.md** when completing phase exit criteria (with user awareness).
+6. **Secrets** stay in `.env`; never commit keys.
+7. **First wedge:** engineering incident room — see [docs/mvp-engineering-incident.md](../../docs/mvp-engineering-incident.md) for Phase 4.
+
+Apply skill `domchat-phases` for full workflow.
