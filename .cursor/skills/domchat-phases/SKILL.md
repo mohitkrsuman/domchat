@@ -66,6 +66,59 @@ description: >-
 
 See [phase-reference.md](phase-reference.md)
 
+## UI conventions (required on every feature)
+
+When building any UI feature, include:
+
+1. **Toast feedback** via `useToast()` from `src/components/toast.tsx`
+2. **Button loaders** via `ButtonLoader` / `Spinner` from `src/components/ui.tsx` on submit/actions
+3. **Skeleton loaders** for page/list fetch states via `src/components/skeletons.tsx` (extend as needed)
+
+### Error handling + toast
+
+```tsx
+import { useToast } from "@/components/toast";
+
+const { toast } = useToast();
+
+try {
+  const res = await fetch(...);
+  const data = await res.json();
+  if (!res.ok) {
+    toast(data.error ?? "Something went wrong", "error");
+    return;
+  }
+  toast("Saved"); // or feature-specific success
+} catch {
+  toast("Something went wrong", "error");
+}
+```
+
+Rules:
+- Toast **errors** for failed API/auth actions
+- Toast **success** for create/update/sign-in/sign-up/sign-out
+- Keep toast copy short (one line)
+- Still show inline form errors when useful; toast is the primary feedback
+- API responses stay `{ error: string, code?: string }`
+
+### Loaders
+
+| Situation | Use |
+|---|---|
+| Form submit / mutation in progress | `ButtonLoader` on the button; disable inputs |
+| Initial page/list data fetch | Skeleton (`IncidentsListSkeleton`, `FormPageSkeleton`, or new minimal skeleton) |
+| Suspense boundary fallback | Skeleton blocks, not raw "Loading…" text |
+| Tiny async action (sign out) | Inline `Spinner` + short label |
+
+Do **not** ship features with blank screens or spinner-only full pages when a skeleton layout fits.
+
+### Shared components
+
+- `src/components/toast.tsx` — `ToastProvider`, `useToast`
+- `src/components/ui.tsx` — `Spinner`, `Skeleton`, `ButtonLoader`
+- `src/components/skeletons.tsx` — page/list skeletons
+- Wrap app with `Providers` in `layout.tsx` (already done)
+
 ## Anti-patterns (reject unless phase allows)
 
 - Billing, SSO, CRM, support tickets before Phase 6
@@ -88,5 +141,6 @@ Ready to advance to Phase N+1?
 ## Additional resources
 
 - Full phase details: [phase-reference.md](phase-reference.md)
+- UI toast/loader patterns: [ui-conventions.md](ui-conventions.md)
 - MVP spec: [docs/mvp-engineering-incident.md](../../docs/mvp-engineering-incident.md)
 - Agent entrypoint: [AGENTS.md](../../AGENTS.md)

@@ -19,6 +19,14 @@
 - [ ] Incident data persists across refresh
 - [ ] Basic role on workspace: admin | member
 
+### Implemented (code ready — verify in browser)
+
+- Prisma schema + migration `phase1_foundation` applied
+- Supabase Auth: `/login`, `/signup`, sign out
+- Local `User` upsert from Supabase session
+- Workspace create API + `/workspace` page (creator = `admin`)
+- Incident list/create UI + `/api/v1/incidents`
+
 ---
 
 ## Phase progress
@@ -42,7 +50,7 @@
 ### Phase 1 (now)
 
 - Prisma + Postgres schema: `users`, `workspaces`, `workspace_members`, `incidents`
-- Auth (sign up / sign in)
+- Auth (sign up / sign in) via Supabase
 - Workspace creation
 - Incident CRUD API (`/api/v1/incidents`)
 - UI: incident list page, create incident form

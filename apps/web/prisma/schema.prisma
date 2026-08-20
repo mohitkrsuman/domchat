@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  admin
+  member
+}
+
+enum IncidentSeverity {
+  sev1
+  sev2
+  sev3
+}
+
+enum IncidentStatus {
+  open
+  investigating
+  fix_proposed
+  ready_for_pr
+  resolved
+  blocked
+}
+
+model User {
+  id         String   @id @default(cuid())
+  supabaseId String   @unique @map("supabase_id")
+  email      String   @unique
+  name       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  memberships       WorkspaceMember[]
+  ownedIncidents    Incident[]        @relation("IncidentOwner")
+  createdIncidents  Incident[]        @relation("IncidentCreator")
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members   WorkspaceMember[]
+  incidents Incident[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  workspaceId String        @map("workspace_id")
+  userId      String        @map("user_id")
+  role        WorkspaceRole @default(member)
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Incident {
+  id          String           @id @default(cuid())
+  workspaceId String           @map("workspace_id")
+  title       String
+  severity    IncidentSeverity
+  status      IncidentStatus   @default(open)
+  repoUrl     String           @map("repo_url")
+  ownerId     String           @map("owner_id")
+  createdById String           @map("created_by_id")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  resolvedAt  DateTime?        @map("resolved_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner     User      @relation("IncidentOwner", fields: [ownerId], references: [id])
+  createdBy User      @relation("IncidentCreator", fields: [createdById], references: [id])
+
+  @@index([workspaceId])
+  @@map("incidents")
+}

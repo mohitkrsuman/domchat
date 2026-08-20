@@ -42,15 +42,20 @@ docker compose ps   # postgres + redis should be healthy
 
 If Docker is not installed, skip this step for now — the app still runs; health check will show `degraded`.
 
-### 3. Run the app (Phase 0 spike)
+### 3. Run the app
 
 ```bash
 cd apps/web
 npm install
-npm run dev
+npm run db:migrate   # first time / after schema changes
+npm run dev          # default :3000 — or npm run dev -- -p 4000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — health check and LLM streaming spike.
+Open the app URL from your terminal (often [http://localhost:3000](http://localhost:3000) or `:4000`).
+
+**Phase 1 flow:** Sign up → create workspace → New incident → refresh → incident still listed.
+
+**Supabase tip:** For local testing, in Supabase Dashboard → Authentication → Providers → Email, you can disable “Confirm email” so sign-up creates a session immediately.
 
 ### 4. Verify Phase 0 exit criteria
 

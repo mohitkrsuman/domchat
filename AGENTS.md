@@ -46,6 +46,7 @@ Phase 0 → 1 → 2 → 3 → 4 (first ship) → 5 → 6 → 7 → 8
 - Human-in-the-loop for risky actions (Phase 4+)
 - No auto-merge or auto-deploy without approval gates
 - Secrets in `.env` only — never commit API keys
+- UI feedback on every feature: toast (success/error), button loaders on mutations, skeleton loaders on data fetch — see skill `domchat-phases`
 
 ## File layout
 

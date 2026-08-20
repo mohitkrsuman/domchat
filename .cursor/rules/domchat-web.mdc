@@ -8,8 +8,10 @@ alwaysApply: false
 
 - Use App Router (`app/` directory), Server Components by default; `"use client"` only when needed.
 - API routes under `app/api/`; version incident APIs as `/api/v1/` from Phase 1.
-- Prisma client: single shared instance in `lib/db.ts` (add in Phase 1).
+- Prisma client: single shared instance in `lib/db.ts`.
 - Env vars: access server secrets only in server code; use `NEXT_PUBLIC_` only for browser-safe values.
 - Error responses: `{ error: string, code?: string }` with appropriate HTTP status.
-- Incident/session IDs: use UUIDs (cuid/uuid in Prisma).
+- Incident/session IDs: use cuid in Prisma.
+- **UI feedback (required):** `useToast()` for success/error; `ButtonLoader`/`Spinner` on actions; skeleton components for list/page loading. See skill `domchat-phases` → UI conventions.
+- **Theme:** support light + dark via CSS variables in `globals.css`; use semantic classes (`.btn-primary`, `.input`, `.card`); include theme toggle via `AppChrome` / `ThemeToggle`.
 - Do not add WebSocket or agent queue code until Phase 2–3 per PROJECT_STATUS.md.
