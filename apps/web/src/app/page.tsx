@@ -7,7 +7,7 @@ export default async function HomePage() {
   try {
     const user = await getSessionUser();
     if (user) {
-      redirect("/incidents");
+      redirect("/sessions");
     }
   } catch {
     // Auth/DB unavailable — show landing page
@@ -18,10 +18,10 @@ export default async function HomePage() {
       <AppChrome />
       <header className="mt-16 max-w-xl">
         <p className="eyebrow">Phase 1 — Foundation</p>
-        <h1 className="title text-4xl">DomChat</h1>
+        <h1 className="title text-4xl tracking-[0.08em]">DOOMCHAT</h1>
         <p className="subtitle mt-3 text-base">
-          Multiplayer AI agent workspace. Sign in to create a workspace and start tracking
-          engineering incidents.
+          Shared agent sessions for teams — on-call, features, bugs, and testing, together
+          with AI.
         </p>
       </header>
 

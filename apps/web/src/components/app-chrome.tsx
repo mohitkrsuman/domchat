@@ -14,7 +14,7 @@ export function AppChrome({
     <div className="app-header">
       {showBrand ? (
         <Link href="/" className="brand">
-          DomChat
+          DOOMCHAT
         </Link>
       ) : (
         <span />

@@ -12,19 +12,25 @@ enum WorkspaceRole {
   member
 }
 
-enum IncidentSeverity {
+enum SessionType {
+  on_call
+  feature
+  bug
+  testing
+  other
+}
+
+enum SessionSeverity {
   sev1
   sev2
   sev3
 }
 
-enum IncidentStatus {
+enum SessionStatus {
   open
-  investigating
-  fix_proposed
-  ready_for_pr
-  resolved
+  active
   blocked
+  resolved
 }
 
 model User {
@@ -34,9 +40,9 @@ model User {
   name       String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  memberships       WorkspaceMember[]
-  ownedIncidents    Incident[]        @relation("IncidentOwner")
-  createdIncidents  Incident[]        @relation("IncidentCreator")
+  memberships      WorkspaceMember[]
+  ownedSessions    Session[]         @relation("SessionOwner")
+  createdSessions  Session[]         @relation("SessionCreator")
 
   @@map("users")
 }
@@ -46,8 +52,8 @@ model Workspace {
   name      String
   createdAt DateTime @default(now()) @map("created_at")
 
-  members   WorkspaceMember[]
-  incidents Incident[]
+  members  WorkspaceMember[]
+  sessions Session[]
 
   @@map("workspaces")
 }
@@ -65,13 +71,14 @@ model WorkspaceMember {
   @@map("workspace_members")
 }
 
-model Incident {
+model Session {
   id          String           @id @default(cuid())
   workspaceId String           @map("workspace_id")
   title       String
-  severity    IncidentSeverity
-  status      IncidentStatus   @default(open)
-  repoUrl     String           @map("repo_url")
+  type        SessionType      @default(other)
+  severity    SessionSeverity?
+  status      SessionStatus    @default(open)
+  repoUrl     String?          @map("repo_url")
   ownerId     String           @map("owner_id")
   createdById String           @map("created_by_id")
   createdAt   DateTime         @default(now()) @map("created_at")
@@ -79,9 +86,9 @@ model Incident {
   resolvedAt  DateTime?        @map("resolved_at")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  owner     User      @relation("IncidentOwner", fields: [ownerId], references: [id])
-  createdBy User      @relation("IncidentCreator", fields: [createdById], references: [id])
+  owner     User      @relation("SessionOwner", fields: [ownerId], references: [id])
+  createdBy User      @relation("SessionCreator", fields: [createdById], references: [id])
 
   @@index([workspaceId])
-  @@map("incidents")
+  @@map("sessions")
 }

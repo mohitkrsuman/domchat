@@ -15,17 +15,19 @@
 ## Phase 1 exit criteria
 
 - [ ] User can sign in and create a workspace
-- [ ] User can create and list incidents
-- [ ] Incident data persists across refresh
+- [ ] User can create and list sessions
+- [ ] Session data persists across refresh
 - [ ] Basic role on workspace: admin | member
 
 ### Implemented (code ready — verify in browser)
 
-- Prisma schema + migration `phase1_foundation` applied
+- Prisma schema + migration applied (`Session` model; types: on_call, feature, bug, testing, other)
 - Supabase Auth: `/login`, `/signup`, sign out
 - Local `User` upsert from Supabase session
 - Workspace create API + `/workspace` page (creator = `admin`)
-- Incident list/create UI + `/api/v1/incidents`
+- Session list/create UI + `/api/v1/sessions`
+- Branding: DOOMCHAT; light/dark theme with icon toggle
+- Toast + button loaders + skeletons
 
 ---
 
@@ -49,17 +51,17 @@
 
 ### Phase 1 (now)
 
-- Prisma + Postgres schema: `users`, `workspaces`, `workspace_members`, `incidents`
+- Prisma + Postgres schema: `users`, `workspaces`, `workspace_members`, `sessions`
 - Auth (sign up / sign in) via Supabase
 - Workspace creation
-- Incident CRUD API (`/api/v1/incidents`)
-- UI: incident list page, create incident form
+- Session CRUD API (`/api/v1/sessions`)
+- UI: session list page, create session form (types: on-call, feature, bug, testing)
 
 ### Do NOT build yet
 
 - WebSockets / presence (Phase 2)
 - Agent runs / BullMQ (Phase 3)
-- Incident room / timeline / approvals (Phase 4)
+- Live session room / timeline / approvals (Phase 4)
 
 ---
 

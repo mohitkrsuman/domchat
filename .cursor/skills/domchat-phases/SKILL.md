@@ -36,10 +36,12 @@ description: >-
 
 ### Phase 1 — Foundation
 
-**Build:** auth, workspace, Prisma schema (users, workspaces, incidents), incident list/create API + UI  
+**Build:** auth, workspace, Prisma schema (users, workspaces, sessions), session list/create API + UI  
 **Skip:** WebSocket, agent runs, timeline events
 
-**Exit:** CRUD incidents persist in Postgres
+**Exit:** CRUD sessions persist in Postgres
+
+Primary product unit is **session** (shared team + agent work). Types: on_call, feature, bug, testing, other.
 
 ### Phase 2 — Multiplayer shell
 
@@ -111,6 +113,8 @@ Rules:
 | Tiny async action (sign out) | Inline `Spinner` + short label |
 
 Do **not** ship features with blank screens or spinner-only full pages when a skeleton layout fits.
+
+Primary collaboration unit in the product UI is **session** (not incident). Session types: on_call, feature, bug, testing, other.
 
 ### Shared components
 

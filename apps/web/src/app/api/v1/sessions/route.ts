@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
+import { SessionSeverity, SessionType } from "@prisma/client";
 import { getPrimaryWorkspace, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-const SEVERITIES = ["sev1", "sev2", "sev3"] as const;
-type IncidentSeverity = (typeof SEVERITIES)[number];
-
-function isIncidentSeverity(value: string): value is IncidentSeverity {
-  return (SEVERITIES as readonly string[]).includes(value);
-}
+const TYPES = new Set(["on_call", "feature", "bug", "testing", "other"]);
+const SEVERITIES = new Set(["sev1", "sev2", "sev3"]);
 
 export async function GET() {
   try {
@@ -18,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "Create a workspace first" }, { status: 400 });
     }
 
-    const incidents = await prisma.incident.findMany({
+    const sessions = await prisma.session.findMany({
       where: { workspaceId: membership.workspaceId },
       orderBy: { updatedAt: "desc" },
       include: {
@@ -27,12 +24,12 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ incidents });
+    return NextResponse.json({ sessions });
   } catch (e) {
     if (e instanceof Error && e.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Failed to list incidents" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to list sessions" }, { status: 500 });
   }
 }
 
@@ -47,24 +44,30 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const title = typeof body.title === "string" ? body.title.trim() : "";
-    const repoUrl = typeof body.repoUrl === "string" ? body.repoUrl.trim() : "";
-    const severityRaw = typeof body.severity === "string" ? body.severity : "sev2";
+    const repoUrl =
+      typeof body.repoUrl === "string" && body.repoUrl.trim()
+        ? body.repoUrl.trim()
+        : null;
+    const typeRaw = typeof body.type === "string" ? body.type : "other";
+    const severityRaw =
+      typeof body.severity === "string" && body.severity ? body.severity : null;
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
-    if (!repoUrl) {
-      return NextResponse.json({ error: "Repo URL is required" }, { status: 400 });
+    if (!TYPES.has(typeRaw)) {
+      return NextResponse.json({ error: "Invalid session type" }, { status: 400 });
     }
-    if (!isIncidentSeverity(severityRaw)) {
+    if (severityRaw && !SEVERITIES.has(severityRaw)) {
       return NextResponse.json({ error: "Invalid severity" }, { status: 400 });
     }
 
-    const incident = await prisma.incident.create({
+    const session = await prisma.session.create({
       data: {
         title,
         repoUrl,
-        severity: severityRaw,
+        type: typeRaw as SessionType,
+        severity: severityRaw ? (severityRaw as SessionSeverity) : null,
         status: "open",
         workspaceId: membership.workspaceId,
         ownerId: user.id,
@@ -75,11 +78,11 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ incident }, { status: 201 });
+    return NextResponse.json({ session }, { status: 201 });
   } catch (e) {
     if (e instanceof Error && e.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ error: "Failed to create incident" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 }

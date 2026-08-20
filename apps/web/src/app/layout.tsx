@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DomChat",
+  title: "DOOMCHAT",
   description: "Multiplayer AI agent workspace",
 };
 

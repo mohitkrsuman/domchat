@@ -26,7 +26,7 @@ export default function WorkspacePage() {
         if (res.ok) {
           const data: WorkspaceResponse = await res.json();
           if (data.workspace) {
-            router.replace("/incidents");
+            router.replace("/sessions");
             return;
           }
         }
@@ -62,7 +62,7 @@ export default function WorkspacePage() {
       }
 
       toast("Workspace created");
-      router.push("/incidents");
+      router.push("/sessions");
       router.refresh();
     } catch {
       const msg = "Failed to create workspace";
@@ -87,7 +87,7 @@ export default function WorkspacePage() {
       <p className="eyebrow">Phase 1 — Foundation</p>
       <h1 className="title">Create workspace</h1>
       <p className="subtitle">
-        Your team’s shared home for incident rooms. You’ll be the workspace admin.
+        Your team’s shared home for agent sessions. You’ll be the workspace admin.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">

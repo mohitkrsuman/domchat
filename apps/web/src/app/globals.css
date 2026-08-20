@@ -190,7 +190,7 @@
   }
 
   .brand {
-    @apply text-sm font-semibold tracking-tight;
+    @apply text-sm font-semibold tracking-[0.14em];
   }
 
   .list {

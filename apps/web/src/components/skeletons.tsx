@@ -2,9 +2,9 @@
 
 import { Skeleton } from "@/components/ui";
 
-export function IncidentsListSkeleton() {
+export function SessionsListSkeleton() {
   return (
-    <div className="space-y-3" aria-busy="true" aria-label="Loading incidents">
+    <div className="space-y-3" aria-busy="true" aria-label="Loading sessions">
       {[0, 1, 2].map((i) => (
         <div key={i} className="card p-4">
           <Skeleton className="h-4 w-2/3" />

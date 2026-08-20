@@ -12,7 +12,7 @@ function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/incidents";
+  const next = searchParams.get("next") ?? "/sessions";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

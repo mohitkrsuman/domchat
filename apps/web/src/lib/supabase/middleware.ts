@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthPage = path.startsWith("/login") || path.startsWith("/signup");
   const isProtected =
-    path.startsWith("/incidents") ||
+    path.startsWith("/sessions") ||
     path.startsWith("/workspace") ||
     path.startsWith("/api/v1");
 
@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user && isAuthPage) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/incidents";
+    redirectUrl.pathname = "/sessions";
     return NextResponse.redirect(redirectUrl);
   }
 
