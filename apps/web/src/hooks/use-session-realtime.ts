@@ -7,7 +7,18 @@ import type { PresenceUser, ServerToClient, TimelineEvent } from "@/lib/realtime
 export type RealtimeStatus = "connecting" | "live" | "offline";
 
 function wsUrl() {
-  return process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4001";
+  const configured = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4001";
+  // Use the page hostname so LAN clients (e.g. http://192.168.x.x:3000) hit this
+  // machine's realtime server instead of their own localhost.
+  if (typeof window === "undefined") return configured;
+  try {
+    const u = new URL(configured);
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const port = u.port || "4001";
+    return `${proto}//${window.location.hostname}:${port}`;
+  } catch {
+    return configured;
+  }
 }
 
 export function useSessionRealtime({

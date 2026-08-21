@@ -26,13 +26,33 @@ type SocketClient = {
 const clients = new Set<SocketClient>();
 const port = Number(process.env.WS_PORT ?? 4001);
 
+function isLocalOrPrivateHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+    return true;
+  }
+  if (hostname.startsWith("192.168.") || hostname.startsWith("10.")) return true;
+  const m = /^172\.(\d+)\./.exec(hostname);
+  if (m) {
+    const octet = Number(m[1]);
+    if (octet >= 16 && octet <= 31) return true;
+  }
+  return false;
+}
+
 function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return true;
   const allowed = process.env.NEXT_PUBLIC_APP_URL;
   if (allowed && origin === allowed) return true;
   try {
     const host = new URL(origin).hostname;
-    if (host === "localhost" || host === "127.0.0.1") return true;
+    if (isLocalOrPrivateHost(host)) return true;
+    if (allowed) {
+      try {
+        if (new URL(allowed).hostname === host) return true;
+      } catch {
+        // ignore invalid APP_URL
+      }
+    }
   } catch {
     return false;
   }
