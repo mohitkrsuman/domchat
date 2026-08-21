@@ -1,39 +1,10 @@
 import { NextRequest } from "next/server";
+import { getLlmConfig } from "@/lib/llm";
 
 export const runtime = "nodejs";
 
-function getApiConfig():
-  | { url: string; key: string; model: string; extraHeaders: Record<string, string> }
-  | null {
-  const openrouterKey = process.env.OPENROUTER_API_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-
-  if (openrouterKey) {
-    return {
-      url: "https://openrouter.ai/api/v1/chat/completions",
-      key: openrouterKey,
-      model: "openai/gpt-4o-mini",
-      extraHeaders: {
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-        "X-Title": "DomChat",
-      },
-    };
-  }
-
-  if (openaiKey) {
-    return {
-      url: "https://api.openai.com/v1/chat/completions",
-      key: openaiKey,
-      model: "gpt-4o-mini",
-      extraHeaders: {},
-    };
-  }
-
-  return null;
-}
-
 export async function POST(req: NextRequest) {
-  const config = getApiConfig();
+  const config = getLlmConfig();
   if (!config) {
     return Response.json(
       { error: "Set OPENROUTER_API_KEY or OPENAI_API_KEY in .env" },

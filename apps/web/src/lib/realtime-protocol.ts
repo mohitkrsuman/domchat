@@ -4,8 +4,18 @@ export const SESSION_EVENT_TYPES = {
   participantLeft: "participant.left",
   participantRemoved: "participant.removed",
   messageUser: "message.user",
+  messageAgent: "message.agent",
   roleChanged: "participant.role_changed",
+  runStarted: "run.started",
+  runStopped: "run.stopped",
+  runCompleted: "run.completed",
+  runFailed: "run.failed",
+  toolCall: "tool.call",
+  toolResult: "tool.result",
+  contextAdded: "context.added",
 } as const;
+
+export type AgentRunStatusValue = "queued" | "running" | "stopped" | "completed" | "failed";
 
 export type SessionEventType =
   (typeof SESSION_EVENT_TYPES)[keyof typeof SESSION_EVENT_TYPES];
@@ -36,6 +46,8 @@ export type ServerToClient =
   | { type: "joined"; sessionId: string }
   | { type: "presence.update"; users: PresenceUser[] }
   | { type: "event.append"; event: TimelineEvent }
+  | { type: "run.delta"; runId: string; text: string }
+  | { type: "run.status"; runId: string; status: AgentRunStatusValue }
   | { type: "kicked"; sessionId: string; userId: string }
   | { type: "error"; code: string; message: string };
 

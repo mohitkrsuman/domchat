@@ -32,6 +32,7 @@ Thumbs.db
 # prisma
 apps/web/prisma/*.db
 apps/web/prisma/*.db-journal
+apps/web/src/generated/prisma/
 
 # docker volumes (local)
 .postgres-data/

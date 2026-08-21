@@ -6,6 +6,10 @@ export function canSendMessages(role: ParticipantRole | null | undefined) {
   return role === "contributor" || role === "owner";
 }
 
+export function canRunAgent(role: ParticipantRole | null | undefined) {
+  return canSendMessages(role);
+}
+
 export function isSessionOwner(role: ParticipantRole | null | undefined) {
   return role === "owner";
 }

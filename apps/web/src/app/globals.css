@@ -553,6 +553,41 @@
     color: color-mix(in srgb, var(--muted) 80%, transparent);
   }
 
+  .timeline-tool {
+    @apply mx-auto flex w-full max-w-xl items-start gap-2 rounded-lg border px-3 py-2 text-xs;
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--fg) 3%, var(--bg-elevated));
+    color: var(--muted);
+  }
+
+  .timeline-tool-label {
+    @apply mt-0.5 shrink-0 rounded px-1.5 py-0.5 font-mono text-[0.625rem] uppercase tracking-wide;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+
+  .timeline-tool-name {
+    @apply font-medium;
+    color: var(--fg);
+  }
+
+  .timeline-tool-detail {
+    @apply mt-0.5 whitespace-pre-wrap break-words font-mono;
+    color: var(--muted);
+  }
+
+  .agent-run-badge {
+    @apply rounded-full border px-2 py-0.5 text-xs;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .agent-run-badge.is-live {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
   .room-composer {
     @apply shrink-0 border-t p-2.5;
     border-color: var(--border);

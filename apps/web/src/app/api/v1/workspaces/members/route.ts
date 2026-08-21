@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { WorkspaceRole } from "@prisma/client";
+import { WorkspaceRole } from "@/generated/prisma";
 import { jsonError, requireUser, requireWorkspace } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 

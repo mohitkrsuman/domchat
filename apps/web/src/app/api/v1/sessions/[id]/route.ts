@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SessionSeverity, SessionStatus, SessionType } from "@prisma/client";
+import { SessionSeverity, SessionStatus, SessionType } from "@/generated/prisma";
 import { jsonError, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {

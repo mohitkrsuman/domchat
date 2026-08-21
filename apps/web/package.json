@@ -4,22 +4,26 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/free-ws-port.mjs",
-    "dev": "concurrently -n web,realtime -c cyan,magenta \"next dev\" \"npm run dev:realtime\"",
+    "dev": "concurrently -n web,realtime,worker -c cyan,magenta,green \"next dev\" \"npm run dev:realtime\" \"npm run dev:worker\"",
     "dev:web": "next dev",
     "dev:realtime": "tsx src/realtime/server.ts",
+    "dev:worker": "tsx src/worker/agent-runner.ts",
     "dev:all": "npm run dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "start:realtime": "tsx src/realtime/server.ts",
+    "start:worker": "tsx src/worker/agent-runner.ts",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
+    "bullmq": "^6.2.0",
     "dotenv": "^17.4.2",
     "ioredis": "^6.0.0",
     "next": "^15.1.0",

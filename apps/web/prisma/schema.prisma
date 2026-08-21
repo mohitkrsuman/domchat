@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -39,6 +40,14 @@ enum SessionParticipantRole {
   owner
 }
 
+enum AgentRunStatus {
+  queued
+  running
+  stopped
+  completed
+  failed
+}
+
 model User {
   id         String   @id @default(cuid())
   supabaseId String   @unique @map("supabase_id")
@@ -51,6 +60,8 @@ model User {
   createdSessions       Session[]              @relation("SessionCreator")
   sessionParticipations SessionParticipant[]
   sessionEvents         SessionEvent[]
+  requestedRuns         AgentRun[]             @relation("AgentRunRequester")
+  sessionContexts       SessionContext[]
 
   @@map("users")
 }
@@ -98,6 +109,8 @@ model Session {
   createdBy User      @relation("SessionCreator", fields: [createdById], references: [id])
   participants SessionParticipant[]
   events       SessionEvent[]
+  runs         AgentRun[]
+  contexts     SessionContext[]
 
   @@index([workspaceId])
   @@map("sessions")
@@ -129,4 +142,38 @@ model SessionEvent {
 
   @@index([sessionId, createdAt])
   @@map("session_events")
+}
+
+model AgentRun {
+  id            String         @id @default(cuid())
+  sessionId     String         @map("session_id")
+  status        AgentRunStatus @default(queued)
+  requestedById String         @map("requested_by_id")
+  prompt        String?
+  error         String?
+  startedAt     DateTime?      @map("started_at")
+  endedAt       DateTime?      @map("ended_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  session     Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  requestedBy User    @relation("AgentRunRequester", fields: [requestedById], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@index([sessionId, status])
+  @@map("agent_runs")
+}
+
+model SessionContext {
+  id          String   @id @default(cuid())
+  sessionId   String   @map("session_id")
+  kind        String
+  content     String
+  createdById String   @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@map("session_context")
 }

@@ -11,7 +11,7 @@ import { resolve } from "path";
 loadEnv({ path: resolve(process.cwd(), ".env.local") });
 loadEnv({ path: resolve(process.cwd(), ".env") });
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/prisma";
 import WebSocket from "ws";
 import { appendSessionEvent } from "../src/lib/session-events";
 import { SESSION_EVENT_TYPES } from "../src/lib/realtime-protocol";

@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { PresenceUser, ServerToClient, TimelineEvent } from "@/lib/realtime-protocol";
+import type {
+  AgentRunStatusValue,
+  PresenceUser,
+  ServerToClient,
+  TimelineEvent,
+} from "@/lib/realtime-protocol";
 
 export type RealtimeStatus = "connecting" | "live" | "offline";
 
@@ -27,19 +32,27 @@ export function useSessionRealtime({
   onEvent,
   onPresence,
   onKicked,
+  onRunDelta,
+  onRunStatus,
 }: {
   sessionId: string;
   enabled: boolean;
   onEvent: (event: TimelineEvent) => void;
   onPresence: (users: PresenceUser[]) => void;
   onKicked?: () => void;
+  onRunDelta?: (runId: string, text: string) => void;
+  onRunStatus?: (runId: string, status: AgentRunStatusValue) => void;
 }) {
   const onEventRef = useRef(onEvent);
   const onPresenceRef = useRef(onPresence);
   const onKickedRef = useRef(onKicked);
+  const onRunDeltaRef = useRef(onRunDelta);
+  const onRunStatusRef = useRef(onRunStatus);
   onEventRef.current = onEvent;
   onPresenceRef.current = onPresence;
   onKickedRef.current = onKicked;
+  onRunDeltaRef.current = onRunDelta;
+  onRunStatusRef.current = onRunStatus;
   const [status, setStatus] = useState<RealtimeStatus>("offline");
 
   useEffect(() => {
@@ -110,6 +123,12 @@ export function useSessionRealtime({
         }
         if (message.type === "event.append") {
           onEventRef.current(message.event);
+        }
+        if (message.type === "run.delta") {
+          onRunDeltaRef.current?.(message.runId, message.text);
+        }
+        if (message.type === "run.status") {
+          onRunStatusRef.current?.(message.runId, message.status);
         }
         if (message.type === "presence.update") {
           setStatus("live");

@@ -3,13 +3,21 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, use, useCallback, useEffect, useState } from "react";
 import { SessionRoomSkeleton } from "@/components/skeletons";
+import { AgentControls } from "@/components/session-room/agent-controls";
 import { Composer } from "@/components/session-room/composer";
 import { PresencePanel } from "@/components/session-room/presence-panel";
 import { Timeline } from "@/components/session-room/timeline";
 import { useToast } from "@/components/toast";
 import { ButtonLoader } from "@/components/ui";
 import { useSessionRealtime } from "@/hooks/use-session-realtime";
-import { SESSION_EVENT_TYPES, type PresenceUser, type TimelineEvent } from "@/lib/realtime-protocol";
+import type { AgentRunDto, SessionContextDto } from "@/lib/agent/types";
+import { isActiveRunStatus } from "@/lib/agent/types";
+import {
+  SESSION_EVENT_TYPES,
+  type AgentRunStatusValue,
+  type PresenceUser,
+  type TimelineEvent,
+} from "@/lib/realtime-protocol";
 import {
   SESSION_STATUSES,
   SESSION_TYPE_LABELS,
@@ -17,7 +25,7 @@ import {
   type SessionStatusValue,
   type SessionTypeValue,
 } from "@/lib/session-fields";
-import { canSendMessages, isSessionOwner } from "@/lib/session-roles";
+import { canRunAgent, canSendMessages, isSessionOwner } from "@/lib/session-roles";
 
 type UserRef = { id: string; email: string; name: string | null };
 
@@ -64,6 +72,12 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   const [repoUrl, setRepoUrl] = useState("");
   const [severity, setSeverity] = useState("");
   const [status, setStatus] = useState<SessionStatusValue>("open");
+  const [activeRun, setActiveRun] = useState<AgentRunDto | null>(null);
+  const [contexts, setContexts] = useState<SessionContextDto[]>([]);
+  const [live, setLive] = useState<{ runId: string; text: string } | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const [addingContext, setAddingContext] = useState(false);
 
   const onEvent = useCallback((event: TimelineEvent) => {
     setEvents((prev) => (prev.some((e) => e.id === event.id) ? prev : [...prev, event]));
@@ -97,6 +111,37 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
         );
       }
     }
+    if (event.type === SESSION_EVENT_TYPES.messageAgent) {
+      const runId = String(event.payload.runId ?? "");
+      setLive((prev) => (prev && prev.runId === runId ? null : prev));
+    }
+    if (event.type === SESSION_EVENT_TYPES.runStarted) {
+      const runId = String(event.payload.runId ?? "");
+      if (runId) {
+        setActiveRun((prev) =>
+          prev ?? {
+            id: runId,
+            sessionId: event.sessionId,
+            status: "queued",
+            requestedById: event.actorId ?? "",
+            prompt: typeof event.payload.prompt === "string" ? event.payload.prompt : null,
+            error: null,
+            startedAt: null,
+            endedAt: null,
+            createdAt: event.createdAt,
+          }
+        );
+      }
+    }
+    if (
+      event.type === SESSION_EVENT_TYPES.runCompleted ||
+      event.type === SESSION_EVENT_TYPES.runFailed ||
+      event.type === SESSION_EVENT_TYPES.runStopped
+    ) {
+      setActiveRun(null);
+      setLive(null);
+      setStopping(false);
+    }
   }, []);
 
   const onPresence = useCallback((users: PresenceUser[]) => {
@@ -108,12 +153,44 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
     router.replace("/sessions");
   }, [router, toast]);
 
+  const onRunDelta = useCallback((runId: string, text: string) => {
+    setLive((prev) => ({
+      runId,
+      text: prev && prev.runId === runId ? `${prev.text}${text}` : text,
+    }));
+  }, []);
+
+  const onRunStatus = useCallback((runId: string, status: AgentRunStatusValue) => {
+    setActiveRun((prev) => {
+      const next: AgentRunDto = prev && prev.id === runId
+        ? { ...prev, status }
+        : {
+            id: runId,
+            sessionId: id,
+            status,
+            requestedById: prev?.requestedById ?? "",
+            prompt: prev?.prompt ?? null,
+            error: prev?.error ?? null,
+            startedAt: prev?.startedAt ?? null,
+            endedAt: prev?.endedAt ?? null,
+            createdAt: prev?.createdAt ?? new Date().toISOString(),
+          };
+      return isActiveRunStatus(status) ? next : null;
+    });
+    if (!isActiveRunStatus(status)) {
+      setLive((prev) => (prev && prev.runId === runId ? null : prev));
+      setStopping(false);
+    }
+  }, [id]);
+
   const { status: realtimeStatus } = useSessionRealtime({
     sessionId: id,
     enabled: !loading && Boolean(session) && Boolean(me),
     onEvent,
     onPresence,
     onKicked,
+    onRunDelta,
+    onRunStatus,
   });
 
   useEffect(() => {
@@ -161,6 +238,19 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
           return;
         }
         setEvents(eventsData.events ?? []);
+
+        const [runsRes, contextRes] = await Promise.all([
+          fetch(`/api/v1/sessions/${id}/runs`),
+          fetch(`/api/v1/sessions/${id}/context`),
+        ]);
+        const runsData = await runsRes.json();
+        if (runsRes.ok) {
+          setActiveRun(runsData.active ?? null);
+        }
+        const contextData = await contextRes.json();
+        if (contextRes.ok) {
+          setContexts(contextData.contexts ?? []);
+        }
       } catch {
         const msg = "Failed to load session";
         setError(msg);
@@ -175,6 +265,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
   const showSeverity = type === "on_call" || type === "bug";
   const viewerBlocked = !canSendMessages(me?.role);
   const owner = isSessionOwner(me?.role);
+  const canManageAgent = canRunAgent(me?.role);
 
   function openEdit() {
     if (!session) return;
@@ -257,6 +348,80 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  async function onStartAgent(prompt: string) {
+    setStarting(true);
+    try {
+      const res = await fetch(`/api/v1/sessions/${id}/runs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error ?? "Failed to start agent", "error");
+        if (data.run) setActiveRun(data.run);
+        return false;
+      }
+      if (data.run) setActiveRun(data.run);
+      if (data.event) onEvent(data.event);
+      toast("Agent started");
+      return true;
+    } catch {
+      toast("Failed to start agent", "error");
+      return false;
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  async function onStopAgent() {
+    if (!activeRun) return;
+    setStopping(true);
+    try {
+      const res = await fetch(`/api/v1/sessions/${id}/runs/${activeRun.id}/stop`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error ?? "Failed to stop agent", "error");
+        setStopping(false);
+        return;
+      }
+      if (data.event) onEvent(data.event);
+      if (data.run && !data.stopping) {
+        setActiveRun(isActiveRunStatus(data.run.status) ? data.run : null);
+        setStopping(false);
+      }
+      toast(data.stopping ? "Stopping agent…" : "Agent stopped");
+    } catch {
+      toast("Failed to stop agent", "error");
+      setStopping(false);
+    }
+  }
+
+  async function onAddContext(kind: string, content: string) {
+    setAddingContext(true);
+    try {
+      const res = await fetch(`/api/v1/sessions/${id}/context`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, content }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast(data.error ?? "Failed to add context", "error");
+        return false;
+      }
+      if (data.context) setContexts((prev) => [data.context, ...prev]);
+      if (data.event) onEvent(data.event);
+      toast("Context added");
+      return true;
+    } catch {
+      toast("Failed to add context", "error");
+      return false;
+    } finally {
+      setAddingContext(false);
+    }
+  }
+
   async function onChangeRole(userId: string, role: "viewer" | "contributor") {
     setChangingUserId(userId);
     try {
@@ -327,6 +492,17 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               </p>
             </div>
             <div className="room-toolbar">
+              <AgentControls
+                canManage={canManageAgent}
+                activeRun={activeRun}
+                starting={starting}
+                stopping={stopping}
+                onStart={onStartAgent}
+                onStop={onStopAgent}
+                contexts={contexts}
+                addingContext={addingContext}
+                onAddContext={onAddContext}
+              />
               <button type="button" onClick={openEdit} className="btn-ghost">
                 Edit
               </button>
@@ -352,11 +528,11 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               <div className="room-chat-header">
                 <h2 className="text-sm font-medium">Timeline</h2>
               </div>
-              <Timeline events={events} currentUserId={me?.userId ?? null} />
+              <Timeline events={events} currentUserId={me?.userId ?? null} live={live} />
               <div className="room-composer">
                 <Composer disabled={viewerBlocked} sending={sending} onSend={onSend} />
                 {viewerBlocked && (
-                  <p className="subtitle mt-2 text-xs">Viewers cannot send messages.</p>
+                  <p className="subtitle mt-2 text-xs">Viewers cannot send messages or start the agent.</p>
                 )}
               </div>
             </section>

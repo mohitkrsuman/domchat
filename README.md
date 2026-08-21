@@ -2,7 +2,7 @@
 
 Multiplayer AI agent workspace — shared live sessions where teams investigate, redirect, and hand off agent work together.
 
-**Current phase:** Phase 2 — Multiplayer shell  
+**Current phase:** Phase 3 — Agent v1  
 **Status tracker:** [PROJECT_STATUS.md](./PROJECT_STATUS.md)
 
 ## Docs
@@ -52,13 +52,13 @@ cp .env.example .env.local   # add Supabase keys + REDIS_URL
 npm run dev          # Next.js (:3000) + realtime WebSocket (:4001)
 ```
 
-`npm run dev` starts **both** the Next.js app and the realtime server (`ws://localhost:4001`). Use `npm run dev:web` if you only want Next.js.
+`npm run dev` starts **Next.js**, the realtime server (`ws://localhost:4001`), and the **agent worker**. Use `npm run dev:web` if you only want Next.js.
 
 Open [http://localhost:3000](http://localhost:3000).
 
-**Phase 2 flow:** Sign up → create workspace → add a teammate by email → New session → open the room in two browsers → chat live → refresh restores the timeline.
+**Phase 3 flow:** Sign up → create workspace → New session (set a public GitHub repo URL) → open the room → paste logs via **Add context** → **Start agent**. Teammates see streaming output and tool calls live.
 
-In the session room, Participants should show **Live** (not Offline). If it says Offline, the realtime process is not running.
+In the session room, Participants should show **Live** (not Offline). If it says Offline, the realtime process is not running. If Start agent never leaves “queued”, the worker process is not running.
 
 **Supabase tip:** For local testing, in Supabase Dashboard → Authentication → Providers → Email, you can disable “Confirm email” so sign-up creates a session immediately.
 
@@ -92,6 +92,6 @@ Setup details: [docs/agent-setup.md](./docs/agent-setup.md)
 |---|---|
 | Frontend | Next.js 14+ (App Router), TypeScript, Tailwind |
 | Database | PostgreSQL + Prisma |
-| Cache / queue | Redis (+ BullMQ in Phase 3) |
+| Cache / queue | Redis + BullMQ |
 | Realtime | WebSockets (Phase 2) |
 | LLM | OpenRouter or OpenAI |

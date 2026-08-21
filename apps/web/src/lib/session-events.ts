@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/db";
 import { publishSessionMessage } from "@/lib/redis";
 import { asTimelineEvent, type TimelineEvent } from "@/lib/realtime-protocol";
