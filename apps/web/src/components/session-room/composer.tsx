@@ -46,7 +46,7 @@ export function Composer({
         className="input mt-0 min-h-[2.75rem] resize-none"
         aria-label="Message"
       />
-      <button type="submit" disabled={disabled || sending || !text.trim()} className="btn-primary shrink-0">
+      <button type="submit" disabled={disabled || sending || !text.trim()} className="btn-primary self-end">
         {sending ? <ButtonLoader label="Sending…" /> : "Send"}
       </button>
     </form>

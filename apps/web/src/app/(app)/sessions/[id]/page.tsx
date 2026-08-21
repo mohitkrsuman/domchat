@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, use, useCallback, useEffect, useState } from "react";
 import { SessionRoomSkeleton } from "@/components/skeletons";
@@ -314,26 +313,25 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
       {!loading && !session && error && <p className="error-text">{error}</p>}
       {!loading && session && (
         <>
-          <div className="room-header mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="room-header">
+            <div className="room-header-meta">
               <p className="eyebrow">Session room</p>
-              <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">{session.title}</h1>
-              <p className="subtitle mt-1 truncate">
+              <h1 className="mt-0.5 truncate text-lg font-semibold tracking-tight sm:text-xl">
+                {session.title}
+              </h1>
+              <p className="subtitle mt-0.5 truncate text-xs">
                 {SESSION_TYPE_LABELS[session.type]}
                 {session.severity ? ` · ${session.severity}` : ""}
                 {` · ${session.status}`}
-                {` · owner ${session.owner.name || session.owner.email}`}
+                {` · ${session.owner.name || session.owner.email}`}
               </p>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              <Link href="/sessions" className="btn-secondary">
-                All sessions
-              </Link>
-              <button type="button" onClick={openEdit} className="btn-secondary">
+            <div className="room-toolbar">
+              <button type="button" onClick={openEdit} className="btn-ghost">
                 Edit
               </button>
               <button type="button" onClick={copyShareLink} disabled={copying} className="btn-secondary">
-                {copying ? <ButtonLoader label="Copying…" /> : "Copy share link"}
+                {copying ? <ButtonLoader label="Copying…" /> : "Copy link"}
               </button>
             </div>
           </div>

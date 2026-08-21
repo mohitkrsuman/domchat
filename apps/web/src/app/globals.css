@@ -3,33 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f3f5f4;
-  --bg-elevated: #ffffff;
-  --fg: #171717;
-  --muted: #5c5c5c;
-  --border: #e5e5e5;
-  --border-strong: #d4d4d4;
+  --bg: #e9eceb;
+  --bg-elevated: #f6f7f6;
+  --fg: #2a2a2a;
+  --muted: #6b6b6b;
+  --border: #d8dcd9;
+  --border-strong: #c5cac7;
   --accent: #0f766e;
   --accent-fg: #ffffff;
-  --accent-soft: #ccfbf1;
+  --accent-soft: #d8f3ee;
   --danger: #b91c1c;
   --danger-soft: #fef2f2;
   --success: #047857;
   --success-soft: #ecfdf5;
-  --skeleton: #e7e7e4;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  --skeleton: #dde1de;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.03);
   --ring: #0f766e;
   --nav-height: 3.5rem;
-  --ambient-a: color-mix(in srgb, #0f766e 42%, transparent);
-  --ambient-b: color-mix(in srgb, #0891b2 36%, transparent);
-  --ambient-c: color-mix(in srgb, #d6c4a8 38%, transparent);
-  --glass-bg: rgb(255 255 255 / 0.42);
-  --glass-bg-strong: rgb(255 255 255 / 0.55);
-  --glass-border: rgb(255 255 255 / 0.55);
+  --glass-bg: rgb(246 247 246 / 0.72);
+  --glass-bg-strong: rgb(246 247 246 / 0.88);
+  --glass-border: rgb(216 220 217 / 0.9);
   --glass-blur: 22px;
-  --glass-shadow:
-    0 8px 28px rgb(15 23 42 / 0.06),
-    inset 0 1px 0 rgb(255 255 255 / 0.65);
+  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
 }
 
 .dark {
@@ -49,9 +44,6 @@
   --skeleton: #262626;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.35);
   --ring: #2dd4bf;
-  --ambient-a: color-mix(in srgb, #2dd4bf 30%, transparent);
-  --ambient-b: color-mix(in srgb, #22d3ee 24%, transparent);
-  --ambient-c: color-mix(in srgb, #a8a29e 18%, transparent);
   --glass-bg: rgb(20 20 20 / 0.48);
   --glass-bg-strong: rgb(20 20 20 / 0.62);
   --glass-border: rgb(255 255 255 / 0.12);
@@ -127,7 +119,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50;
+    @apply inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium leading-none transition disabled:opacity-50;
   }
 
   .btn-primary {
@@ -142,15 +134,14 @@
 
   .btn-secondary {
     @apply btn border;
-    background: var(--glass-bg);
-    border-color: var(--glass-border);
+    background: var(--bg-elevated);
+    border-color: var(--border);
     color: var(--fg);
-    backdrop-filter: blur(10px) saturate(1.1);
-    -webkit-backdrop-filter: blur(10px) saturate(1.1);
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--glass-bg-strong) 85%, var(--fg) 8%);
+    background: color-mix(in srgb, var(--bg-elevated) 70%, var(--fg) 6%);
+    border-color: var(--border-strong);
   }
 
   .btn-ghost {
@@ -160,6 +151,7 @@
 
   .btn-ghost:hover:not(:disabled) {
     color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
   }
 
   .glass {
@@ -234,6 +226,16 @@
     @apply text-sm font-semibold tracking-[0.14em];
   }
 
+  .back-button {
+    @apply inline-flex h-9 shrink-0 items-center gap-1 rounded-md px-2 text-sm font-medium transition;
+    color: var(--muted);
+  }
+
+  .back-button:hover {
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+  }
+
   .app-shell {
     @apply relative min-h-screen;
   }
@@ -245,11 +247,11 @@
   .app-nav {
     @apply sticky top-0 z-30 border-b;
     height: var(--nav-height);
-    border-color: var(--glass-border);
-    background: var(--glass-bg);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(1.4);
-    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(1.4);
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .app-nav-inner {
@@ -261,7 +263,7 @@
   }
 
   .app-nav-link {
-    @apply rounded-lg px-3 py-1.5 text-sm transition;
+    @apply inline-flex h-9 items-center rounded-md px-3 text-sm transition;
     color: var(--muted);
   }
 
@@ -291,12 +293,10 @@
   }
 
   .profile-trigger {
-    @apply inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition;
-    border-color: var(--glass-border);
-    background: var(--glass-bg-strong);
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-md border text-xs font-semibold transition;
+    border-color: var(--border);
+    background: var(--bg-elevated);
     color: var(--fg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .profile-trigger:hover {
@@ -337,94 +337,8 @@
   }
 
   .page-room {
-    @apply mx-auto flex w-full flex-col overflow-hidden px-4 py-4 sm:px-6;
+    @apply mx-auto flex w-full max-w-[90rem] flex-col overflow-hidden px-4 py-3 sm:px-6;
     height: calc(100dvh - var(--nav-height));
-  }
-
-  .ambient-root {
-    @apply pointer-events-none fixed inset-0 z-0 overflow-hidden;
-  }
-
-  .ambient-wash {
-    @apply absolute inset-0;
-    background:
-      radial-gradient(120% 80% at 10% -10%, var(--ambient-a), transparent 55%),
-      radial-gradient(90% 70% at 90% 0%, var(--ambient-b), transparent 50%),
-      radial-gradient(80% 60% at 50% 110%, var(--ambient-c), transparent 55%),
-      var(--bg);
-  }
-
-  .ambient-blob {
-    @apply absolute rounded-full;
-    filter: blur(72px);
-    opacity: 1;
-    will-change: transform;
-  }
-
-  .ambient-blob-a {
-    width: 42vw;
-    height: 42vw;
-    max-width: 34rem;
-    max-height: 34rem;
-    top: -8%;
-    left: -6%;
-    background: var(--ambient-a);
-    animation: ambient-drift-a 22s ease-in-out infinite alternate;
-  }
-
-  .ambient-blob-b {
-    width: 36vw;
-    height: 36vw;
-    max-width: 28rem;
-    max-height: 28rem;
-    top: 18%;
-    right: -8%;
-    background: var(--ambient-b);
-    animation: ambient-drift-b 18s ease-in-out infinite alternate;
-  }
-
-  .ambient-blob-c {
-    width: 40vw;
-    height: 40vw;
-    max-width: 30rem;
-    max-height: 30rem;
-    bottom: -12%;
-    left: 28%;
-    background: var(--ambient-c);
-    animation: ambient-drift-c 26s ease-in-out infinite alternate;
-  }
-
-  @keyframes ambient-drift-a {
-    from {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    to {
-      transform: translate3d(8%, 12%, 0) scale(1.08);
-    }
-  }
-
-  @keyframes ambient-drift-b {
-    from {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    to {
-      transform: translate3d(-10%, 8%, 0) scale(1.12);
-    }
-  }
-
-  @keyframes ambient-drift-c {
-    from {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    to {
-      transform: translate3d(6%, -10%, 0) scale(1.06);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ambient-blob {
-      animation: none !important;
-    }
   }
 
   .list {
@@ -454,34 +368,37 @@
   }
 
   .room-header {
-    @apply shrink-0;
+    @apply mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b pb-3;
+    border-color: var(--border);
+  }
+
+  .room-header-meta {
+    @apply min-w-0 flex-1;
+  }
+
+  .room-toolbar {
+    @apply flex shrink-0 flex-wrap items-center gap-1.5;
   }
 
   .room-sidebar {
     @apply flex min-h-0 flex-col overflow-hidden rounded-xl;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
   }
 
   .room-sidebar-header {
-    @apply shrink-0 border-b px-4 py-3;
-    border-color: color-mix(in srgb, var(--glass-border) 80%, transparent);
-    background: rgb(255 255 255 / 0.18);
-  }
-
-  .dark .room-sidebar-header {
-    background: rgb(255 255 255 / 0.04);
+    @apply shrink-0 border-b px-3 py-2.5;
+    border-color: var(--border);
+    background: var(--bg-elevated);
   }
 
   .room-sidebar-list {
-    @apply min-h-0 flex-1 space-y-1 overflow-y-auto p-2;
+    @apply min-h-0 flex-1 space-y-0.5 overflow-y-auto p-1.5;
   }
 
   .participant-row {
-    @apply rounded-lg px-2 py-2;
+    @apply rounded-md px-2 py-1.5;
   }
 
   .participant-row:hover {
@@ -489,21 +406,18 @@
   }
 
   .participant-manage-toggle {
-    @apply shrink-0 rounded-md border px-2 py-1 text-xs font-medium transition disabled:opacity-50;
-    border-color: var(--glass-border);
-    color: var(--fg);
-    background: var(--glass-bg-strong);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    @apply inline-flex h-7 shrink-0 items-center rounded-md px-2 text-xs font-medium transition disabled:opacity-50;
+    color: var(--muted);
   }
 
   .participant-manage-toggle:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--glass-bg-strong) 80%, var(--fg) 8%);
+    color: var(--fg);
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
   }
 
   .participant-manage-panel {
     @apply mt-2 space-y-2 border-t pt-2;
-    border-color: color-mix(in srgb, var(--glass-border) 85%, transparent);
+    border-color: var(--border);
   }
 
   .room-chat {
@@ -514,7 +428,7 @@
   }
 
   .room-chat-header {
-    @apply shrink-0 border-b px-4 py-3;
+    @apply shrink-0 border-b px-3 py-2.5;
     border-color: var(--border);
     background: var(--bg-elevated);
   }
@@ -528,13 +442,17 @@
   }
 
   .room-composer {
-    @apply shrink-0 border-t p-3;
+    @apply shrink-0 border-t p-2.5;
     border-color: var(--border);
     background: var(--bg-elevated);
   }
 
   .room-composer-form {
     @apply flex items-end gap-2;
+  }
+
+  .room-composer-form .input {
+    @apply min-h-9 py-2;
   }
 
   .modal-backdrop {

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useToast } from "@/components/toast";
@@ -55,9 +54,6 @@ export default function JoinSessionPage() {
   return (
     <main className="page-app">
       <div className="max-w-xl">
-        <Link href="/sessions" className="btn-ghost px-0">
-          ← Back to sessions
-        </Link>
         <h1 className="title">Join session</h1>
         <p className="subtitle">
           Paste a share link from a teammate. An admin must invite you to that workspace first

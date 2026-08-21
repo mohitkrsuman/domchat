@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BackButton } from "@/components/back-button";
 import { ThemeToggle } from "@/components/theme";
 import { ProfileMenu } from "@/components/profile-menu";
 
@@ -9,15 +10,22 @@ const links = [
   { href: "/sessions", label: "Sessions", match: (path: string) => path === "/sessions" },
   { href: "/workspace", label: "Workspace", match: (path: string) => path.startsWith("/workspace") },
   { href: "/sessions/join", label: "Join", match: (path: string) => path.startsWith("/sessions/join") },
-  { href: "/sessions/new", label: "New session", match: (path: string) => path.startsWith("/sessions/new"), primary: true },
+  {
+    href: "/sessions/new",
+    label: "New session",
+    match: (path: string) => path.startsWith("/sessions/new"),
+    primary: true,
+  },
 ] as const;
 
 export function AppNav() {
   const pathname = usePathname();
+  const showBack = pathname !== "/sessions";
 
   return (
     <header className="app-nav">
       <div className="app-nav-inner">
+        {showBack ? <BackButton fallbackHref="/sessions" /> : null}
         <Link href="/sessions" className="brand">
           DOOMCHAT
         </Link>
@@ -31,7 +39,7 @@ export function AppNav() {
                 href={link.href}
                 className={
                   "primary" in link && link.primary
-                    ? "btn-primary h-9 px-3 text-xs sm:text-sm"
+                    ? "btn-primary"
                     : `app-nav-link${active ? " is-active" : ""}`
                 }
               >

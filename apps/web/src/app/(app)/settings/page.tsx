@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useToast } from "@/components/toast";
 import { createClient } from "@/lib/supabase/client";
 
@@ -69,10 +68,6 @@ export default function SettingsPage() {
           <p className="error-text">Profile unavailable.</p>
         )}
       </section>
-
-      <Link href="/sessions" className="link mt-6 inline-block text-sm">
-        ← Back to sessions
-      </Link>
     </main>
   );
 }
