@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { UserAvatar } from "@/components/user-avatar";
 import type { TimelineEvent } from "@/lib/realtime-protocol";
 import { SESSION_EVENT_TYPES } from "@/lib/realtime-protocol";
 
 function actorLabel(event: TimelineEvent) {
-  return event.actor?.name || event.actor?.email || "system";
+  return event.actor?.name || event.actor?.email || "Someone";
 }
 
 function eventCopy(event: TimelineEvent) {
@@ -24,11 +25,24 @@ function eventCopy(event: TimelineEvent) {
     case SESSION_EVENT_TYPES.roleChanged:
       return `set role of participant to ${String(payload.role ?? "")}`;
     default:
+      if (event.type === "message.agent") {
+        return String(payload.text ?? "");
+      }
       return event.type;
   }
 }
 
-export function Timeline({ events }: { events: TimelineEvent[] }) {
+function isChatMessage(event: TimelineEvent) {
+  return event.type === SESSION_EVENT_TYPES.messageUser || event.type === "message.agent";
+}
+
+export function Timeline({
+  events,
+  currentUserId,
+}: {
+  events: TimelineEvent[];
+  currentUserId: string | null;
+}) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -40,8 +54,8 @@ export function Timeline({ events }: { events: TimelineEvent[] }) {
     return (
       <div className="flex h-full items-center justify-center p-6">
         <div className="card-dashed max-w-sm">
-          <p>No events yet.</p>
-          <p className="subtitle mt-1">Messages and joins will appear here for everyone.</p>
+          <p>No messages yet.</p>
+          <p className="subtitle mt-1">Your notes and teammate chat show up here.</p>
         </div>
       </div>
     );
@@ -51,15 +65,52 @@ export function Timeline({ events }: { events: TimelineEvent[] }) {
     <div ref={scrollerRef} className="room-timeline-scroll">
       <ol className="timeline">
         {events.map((event) => {
-          const isMessage = event.type === SESSION_EVENT_TYPES.messageUser;
+          if (!isChatMessage(event)) {
+            return (
+              <li key={event.id} className="timeline-system">
+                <span className="timeline-system-dot" aria-hidden />
+                <p>
+                  <span className="font-medium">{actorLabel(event)}</span> {eventCopy(event)}
+                  <span className="timeline-system-time">
+                    {" · "}
+                    {new Date(event.createdAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </p>
+              </li>
+            );
+          }
+
+          const isAgent = event.type === "message.agent";
+          const isSelf = !isAgent && Boolean(currentUserId) && event.actorId === currentUserId;
+          const label = isAgent ? "Agent" : isSelf ? "You" : actorLabel(event);
+          const seed = event.actorId || event.actor?.email || event.id;
+
           return (
-            <li key={event.id} className="text-sm">
-              <p className="text-xs muted">
-                {new Date(event.createdAt).toLocaleTimeString()} · {actorLabel(event)}
-              </p>
-              <p className={isMessage ? "mt-1 whitespace-pre-wrap break-words" : "mt-1 muted"}>
-                {eventCopy(event)}
-              </p>
+            <li
+              key={event.id}
+              className={`timeline-msg${isSelf ? " is-self" : ""}${isAgent ? " is-agent" : ""}`}
+            >
+              <UserAvatar
+                name={event.actor?.name}
+                email={event.actor?.email}
+                seed={isAgent ? "agent" : seed}
+                tone={isAgent ? "agent" : isSelf ? "self" : "user"}
+              />
+              <div className="timeline-msg-body">
+                <div className="timeline-msg-meta">
+                  <span className="timeline-msg-name">{label}</span>
+                  <span className="timeline-msg-time">
+                    {new Date(event.createdAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <div className="timeline-msg-bubble">{eventCopy(event)}</div>
+              </div>
             </li>
           );
         })}

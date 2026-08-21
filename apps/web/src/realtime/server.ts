@@ -327,6 +327,16 @@ function start() {
     });
   });
 
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(
+        `Realtime port ${port} is already in use. Stop the other process (lsof -ti :${port} | xargs kill) or set WS_PORT.`
+      );
+      process.exit(1);
+    }
+    throw err;
+  });
+
   server.listen(port, "0.0.0.0", () => {
     console.log(`Realtime server listening on http://127.0.0.1:${port} (ws path /ws)`);
   });

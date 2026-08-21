@@ -352,7 +352,7 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
               <div className="room-chat-header">
                 <h2 className="text-sm font-medium">Timeline</h2>
               </div>
-              <Timeline events={events} />
+              <Timeline events={events} currentUserId={me?.userId ?? null} />
               <div className="room-composer">
                 <Composer disabled={viewerBlocked} sending={sending} onSend={onSend} />
                 {viewerBlocked && (

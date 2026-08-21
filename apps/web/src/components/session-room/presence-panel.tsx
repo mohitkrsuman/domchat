@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CustomSelect } from "@/components/custom-select";
+import { UserAvatar } from "@/components/user-avatar";
 import type { PresenceUser } from "@/lib/realtime-protocol";
 import { ButtonLoader } from "@/components/ui";
 
@@ -73,6 +74,13 @@ export function PresencePanel({
           return (
             <li key={p.userId} className="participant-row text-sm">
               <div className="flex items-center gap-2">
+                <UserAvatar
+                  name={p.user.name}
+                  email={p.user.email}
+                  seed={p.userId}
+                  tone={p.userId === currentUserId ? "self" : "user"}
+                  size="sm"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">
                     {label}

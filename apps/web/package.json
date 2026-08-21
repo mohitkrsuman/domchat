@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -n web,realtime -c cyan,magenta \"next dev\" \"npm run dev:realtime\"",
+    "predev": "node scripts/free-ws-port.mjs",
+    "dev": "concurrently -n web,realtime -c cyan,magenta \"next dev\" \"npm run dev:realtime\"",
     "dev:web": "next dev",
     "dev:realtime": "tsx src/realtime/server.ts",
     "dev:all": "npm run dev",

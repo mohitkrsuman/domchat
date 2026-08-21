@@ -434,11 +434,123 @@
   }
 
   .room-timeline-scroll {
-    @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4;
+    @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4;
   }
 
   .timeline {
     @apply flex flex-col gap-3;
+  }
+
+  .user-avatar {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full font-semibold uppercase leading-none;
+    color: #fff;
+  }
+
+  .user-avatar-sm {
+    @apply h-6 w-6 text-[0.625rem];
+  }
+
+  .user-avatar-md {
+    @apply h-8 w-8 text-[0.6875rem];
+  }
+
+  .user-avatar-user {
+    background: hsl(var(--avatar-hue) 42% 46%);
+  }
+
+  .user-avatar-self {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  .user-avatar-agent {
+    background: color-mix(in srgb, var(--accent) 22%, var(--bg-elevated));
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  }
+
+  .user-avatar-system {
+    background: var(--skeleton);
+    color: var(--muted);
+  }
+
+  .timeline-msg {
+    @apply flex max-w-[min(100%,36rem)] items-start gap-2.5;
+  }
+
+  .timeline-msg.is-self {
+    @apply ml-auto flex-row-reverse;
+  }
+
+  .timeline-msg.is-agent {
+    @apply max-w-[min(100%,40rem)];
+  }
+
+  .timeline-msg-body {
+    @apply min-w-0;
+  }
+
+  .timeline-msg.is-self .timeline-msg-body {
+    @apply text-right;
+  }
+
+  .timeline-msg-meta {
+    @apply mb-1 flex items-baseline gap-2;
+  }
+
+  .timeline-msg.is-self .timeline-msg-meta {
+    @apply flex-row-reverse;
+  }
+
+  .timeline-msg-name {
+    @apply text-xs font-semibold;
+    color: var(--fg);
+  }
+
+  .timeline-msg-time {
+    @apply text-[0.6875rem];
+    color: var(--muted);
+  }
+
+  .timeline-msg-bubble {
+    @apply inline-block max-w-full rounded-2xl px-3 py-2 text-left text-sm whitespace-pre-wrap break-words;
+    background: color-mix(in srgb, var(--fg) 5%, var(--bg-elevated));
+    border: 1px solid var(--border);
+    color: var(--fg);
+  }
+
+  .timeline-msg.is-self .timeline-msg-bubble {
+    background: color-mix(in srgb, var(--accent) 14%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-bottom-right-radius: 0.35rem;
+  }
+
+  .timeline-msg:not(.is-self) .timeline-msg-bubble {
+    border-bottom-left-radius: 0.35rem;
+  }
+
+  .timeline-msg.is-agent .timeline-msg-bubble {
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+    border-radius: 0.75rem;
+  }
+
+  .timeline-system {
+    @apply mx-auto flex max-w-md items-start gap-2 px-2 py-1 text-center text-xs;
+    color: var(--muted);
+  }
+
+  .timeline-system-dot {
+    @apply mt-1.5 h-1 w-1 shrink-0 rounded-full;
+    background: var(--border-strong);
+  }
+
+  .timeline-system p {
+    @apply min-w-0 flex-1 text-left;
+  }
+
+  .timeline-system-time {
+    color: color-mix(in srgb, var(--muted) 80%, transparent);
   }
 
   .room-composer {
