@@ -363,7 +363,10 @@ export default function SessionRoomPage({ params }: { params: Promise<{ id: stri
         return false;
       }
       if (data.run) setActiveRun(data.run);
-      if (data.event) onEvent(data.event);
+      const nextEvents = Array.isArray(data.events) ? data.events : data.event ? [data.event] : [];
+      for (const event of nextEvents) {
+        if (event) onEvent(event);
+      }
       toast("Agent started");
       return true;
     } catch {

@@ -29,7 +29,7 @@ function eventCopy(event: TimelineEvent) {
     case SESSION_EVENT_TYPES.roleChanged:
       return `set role of participant to ${String(payload.role ?? "")}`;
     case SESSION_EVENT_TYPES.runStarted:
-      return "started an agent run";
+      return payload.prompt ? String(payload.prompt) : "started an agent run";
     case SESSION_EVENT_TYPES.runStopped:
       return "stopped the agent run";
     case SESSION_EVENT_TYPES.runCompleted:
@@ -47,8 +47,16 @@ function eventCopy(event: TimelineEvent) {
   }
 }
 
+function isUserPrompt(event: TimelineEvent) {
+  return event.type === SESSION_EVENT_TYPES.runStarted && Boolean(event.payload.prompt);
+}
+
 function isChatMessage(event: TimelineEvent) {
-  return event.type === SESSION_EVENT_TYPES.messageUser || event.type === SESSION_EVENT_TYPES.messageAgent;
+  return (
+    event.type === SESSION_EVENT_TYPES.messageUser ||
+    event.type === SESSION_EVENT_TYPES.messageAgent ||
+    isUserPrompt(event)
+  );
 }
 
 function argsSummary(payload: Record<string, unknown>) {
@@ -66,19 +74,39 @@ type TimelineItem =
 function groupEvents(events: TimelineEvent[]): TimelineItem[] {
   const items: TimelineItem[] = [];
   for (const event of events) {
-    if (event.type !== SESSION_EVENT_TYPES.messageAgent) {
-      items.push({ kind: "event", event });
+    if (event.type === SESSION_EVENT_TYPES.messageAgent) {
+      const runId = String(event.payload.runId ?? event.id);
+      const text = payloadText(event);
+      const last = items[items.length - 1];
+      if (last?.kind === "agent" && last.runId === runId) {
+        last.text = `${last.text}${text}`;
+        last.event = event;
+      } else {
+        items.push({ kind: "agent", runId, text, event });
+      }
       continue;
     }
-    const runId = String(event.payload.runId ?? event.id);
-    const text = payloadText(event);
-    const last = items[items.length - 1];
-    if (last?.kind === "agent" && last.runId === runId) {
-      last.text = `${last.text}${text}`;
-      last.event = event;
-    } else {
-      items.push({ kind: "agent", runId, text, event });
+
+    if (isUserPrompt(event)) {
+      const prompt = String(event.payload.prompt ?? "");
+      const prev = items[items.length - 1];
+      const prevEvent = prev?.kind === "event" ? prev.event : null;
+      const alreadyShown =
+        prevEvent?.type === SESSION_EVENT_TYPES.messageUser &&
+        String(prevEvent.payload.text ?? "") === prompt;
+      if (alreadyShown) {
+        items.push({
+          kind: "event",
+          event: {
+            ...event,
+            payload: { ...event.payload, prompt: null },
+          },
+        });
+        continue;
+      }
     }
+
+    items.push({ kind: "event", event });
   }
   return items;
 }
